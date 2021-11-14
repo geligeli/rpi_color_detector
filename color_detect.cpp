@@ -1,3 +1,9 @@
+#include <assert.h>
+#include <event2/event.h>
+#include <event2/thread.h>
+#include <libcamera/libcamera.h>
+#include <sys/mman.h>
+
 #include <atomic>
 #include <cstring>
 #include <fstream>
@@ -5,27 +11,19 @@
 #include <iomanip>
 #include <iostream>
 #include <list>
-#include <unordered_map>
 #include <memory>
 #include <mutex>
-
-#include <assert.h>
-#include <sys/mman.h>
-
-#include <event2/event.h>
-#include <event2/thread.h>
-#include <libcamera/libcamera.h>
-
-//struct event_base;
+#include <unordered_map>
 
 class EventLoop {
-public:
+ public:
   EventLoop() {
     assert(!instance_);
     evthread_use_pthreads();
     event_ = event_base_new();
     instance_ = this;
   }
+
   ~EventLoop() {
     instance_ = nullptr;
     event_base_free(event_);
@@ -57,7 +55,8 @@ public:
     evtimer_add(ev, &tv);
   }
 
-  template <typename F> void callLater(F &&func) {
+  template <typename F>
+  void callLater(F &&func) {
     {
       std::unique_lock<std::mutex> locker(lock_);
       calls_.emplace_back(std::forward<F>(func));
@@ -66,7 +65,7 @@ public:
     interrupt();
   }
 
-private:
+ private:
   static EventLoop *instance_;
 
   static void timeoutTriggered(int fd, short event, void *arg) {
@@ -103,12 +102,18 @@ static constexpr int TIMEOUT_SEC = 3;
 using namespace libcamera;
 static std::shared_ptr<Camera> camera;
 static EventLoop loop;
-std::unordered_map<libcamera::FrameBuffer *, std::vector<libcamera::Span<uint8_t>>> mapped_buffers;
+std::unordered_map<libcamera::FrameBuffer *,
+                   std::vector<libcamera::Span<uint8_t>>>
+    mapped_buffers;
+
+std::chrono::high_resolution_clock::time_point start =
+    std::chrono::high_resolution_clock::now();
 
 static void processRequest(Request *request) {
-  const auto start = std::chrono::high_resolution_clock::now();
   const Request::BufferMap &buffers = request->buffers();
 
+  std::chrono::high_resolution_clock::time_point request_start =
+      std::chrono::high_resolution_clock::now();
   for (auto bufferPair : buffers) {
     // (Unused) Stream *stream = bufferPair.first;
     FrameBuffer *buffer = bufferPair.second;
@@ -130,45 +135,34 @@ static void processRequest(Request *request) {
     // if (metadata.sequence == 20) {
     auto it = mapped_buffers.find(buffer);
     if (it != mapped_buffers.end()) {
-    //   std::cout << " " << it->second[0].size_bytes() << std::endl;
-    //   std::ofstream ofs("/home/pi/foo.ppm", std::ios::out);
-    //   ofs << "P6\n640 480\n255\n";
+      //   std::cout << " " << it->second[0].size_bytes() << std::endl;
+      //   std::ofstream ofs("/home/pi/foo.ppm", std::ios::out);
+      //   ofs << "P6\n640 480\n255\n";
       uint8_t *buf = it->second[0].data();
 
       auto R = [&](auto x, auto y) -> uint8_t & {
         return buf[x * 640 * 3 + y * 3];
       };
-    //   auto G = [&](auto x, auto y) -> uint8_t & {
-    //     return buf[x * 640 * 3 + y * 3 + 1];
-    //   };
-    //   auto B = [&](auto x, auto y) -> uint8_t & {
-    //     return buf[x * 640 * 3 + y * 3 + 2];
-    //   };
-	  int numBrightPixels = 0;
+      //   auto G = [&](auto x, auto y) -> uint8_t & {
+      //     return buf[x * 640 * 3 + y * 3 + 1];
+      //   };
+      //   auto B = [&](auto x, auto y) -> uint8_t & {
+      //     return buf[x * 640 * 3 + y * 3 + 2];
+      //   };
+
+      int numBrightPixels = 0;
       for (int x = 200; x < 280; ++x) {
         for (int y = 280; y < 360; ++y) {
-		
-
-		        // R(x, y) = 0;
-        //   G(x, y) = 255;
-        //   B(x, y) = 0;
-
           if (R(x, y) > 100) {
             ++numBrightPixels;
-		  }
-		//   if (R(x, y) > 100) {
-		// 	  R(x, y) = 255;
-		//   }
-        //   R(x, y) = 0;
-        //   G(x, y) = 255;
-        //   B(x, y) = 0;
+          }
         }
       }
-	  std::cout << numBrightPixels;
+      std::cout << numBrightPixels;
 
-    //   ofs.write((char const *)buf, it->second[0].size_bytes());
-    //   ofs.close();
-    //   std::terminate();
+      //   ofs.write((char const *)buf, it->second[0].size_bytes());
+      //   ofs.close();
+      //   std::terminate();
     };
     // }
 
@@ -178,16 +172,25 @@ static void processRequest(Request *request) {
      */
   }
 
-  std::cout << '\t' << std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::high_resolution_clock::now() - start).count() << "usec\n";
+  auto now = std::chrono::high_resolution_clock::now();
+
+  std::cout << '\t'
+            << std::chrono::duration_cast<std::chrono::microseconds>(
+                   now - request_start)
+                   .count()
+            << "usec "
+            << std::chrono::duration_cast<std::chrono::microseconds>(
+                   now - std::exchange(start, now))
+                   .count()
+            << "usec\n";
+
   /* Re-queue the Request to the camera. */
   request->reuse(Request::ReuseBuffers);
   camera->queueRequest(request);
 }
 
-
 static void requestComplete(Request *request) {
-  if (request->status() == Request::RequestCancelled)
-    return;
+  if (request->status() == Request::RequestCancelled) return;
 
   loop.callLater([request]() { processRequest(request); });
 }
@@ -214,17 +217,17 @@ std::string cameraName(Camera *camera) {
   std::string name;
 
   switch (props.get(properties::Location)) {
-  case properties::CameraLocationFront:
-    name = "Internal front camera";
-    break;
-  case properties::CameraLocationBack:
-    name = "Internal back camera";
-    break;
-  case properties::CameraLocationExternal:
-    name = "External camera";
-    if (props.contains(properties::Model))
-      name += " '" + props.get(properties::Model) + "'";
-    break;
+    case properties::CameraLocationFront:
+      name = "Internal front camera";
+      break;
+    case properties::CameraLocationBack:
+      name = "Internal back camera";
+      break;
+    case properties::CameraLocationExternal:
+      name = "External camera";
+      if (props.contains(properties::Model))
+        name += " '" + props.get(properties::Model) + "'";
+      break;
   }
 
   name += " (" + camera->id() + ")";
@@ -344,8 +347,8 @@ int main() {
   /*
    * The Camera configuration procedure fails with invalid parameters.
    */
-  streamConfig.size.width = 640;  // 4096
-  streamConfig.size.height = 480; // 2560
+  streamConfig.size.width = 640;   // 4096
+  streamConfig.size.height = 480;  // 2560
   streamConfig.pixelFormat = libcamera::formats::BGR888;
 
   /*
@@ -465,7 +468,7 @@ int main() {
      */
     ControlList &controls = request->controls();
     // controls.set(controls::Brightness, 0.5);
-    int64_t frame_time = 1000000 / 25; // in us
+    int64_t frame_time = 1000000 / 60;  // in us
     controls.set(controls::FrameDurationLimits, {frame_time, frame_time});
 
     requests.push_back(std::move(request));
