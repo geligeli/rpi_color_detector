@@ -5,7 +5,14 @@
 #include <sys/mman.h>
 
 #include <atomic>
+#include <boost/asio.hpp>
+#include <boost/beast/core.hpp>
+#include <boost/beast/http.hpp>
+#include <boost/beast/version.hpp>
+#include <chrono>
+#include <cstdlib>
 #include <cstring>
+#include <ctime>
 #include <fstream>
 #include <functional>
 #include <iomanip>
@@ -13,10 +20,16 @@
 #include <list>
 #include <memory>
 #include <mutex>
+#include <string>
 #include <unordered_map>
 
+namespace beast = boost::beast;   // from <boost/beast.hpp>
+namespace http = beast::http;     // from <boost/beast/http.hpp>
+namespace net = boost::asio;      // from <boost/asio.hpp>
+using tcp = boost::asio::ip::tcp; // from <boost/asio/ip/tcp.hpp>
+
 class EventLoop {
- public:
+public:
   EventLoop() {
     assert(!instance_);
     evthread_use_pthreads();
@@ -55,8 +68,7 @@ class EventLoop {
     evtimer_add(ev, &tv);
   }
 
-  template <typename F>
-  void callLater(F &&func) {
+  template <typename F> void callLater(F &&func) {
     {
       std::unique_lock<std::mutex> locker(lock_);
       calls_.emplace_back(std::forward<F>(func));
@@ -65,7 +77,7 @@ class EventLoop {
     interrupt();
   }
 
- private:
+private:
   static EventLoop *instance_;
 
   static void timeoutTriggered(int fd, short event, void *arg) {
@@ -190,7 +202,8 @@ static void processRequest(Request *request) {
 }
 
 static void requestComplete(Request *request) {
-  if (request->status() == Request::RequestCancelled) return;
+  if (request->status() == Request::RequestCancelled)
+    return;
 
   loop.callLater([request]() { processRequest(request); });
 }
@@ -217,17 +230,17 @@ std::string cameraName(Camera *camera) {
   std::string name;
 
   switch (props.get(properties::Location)) {
-    case properties::CameraLocationFront:
-      name = "Internal front camera";
-      break;
-    case properties::CameraLocationBack:
-      name = "Internal back camera";
-      break;
-    case properties::CameraLocationExternal:
-      name = "External camera";
-      if (props.contains(properties::Model))
-        name += " '" + props.get(properties::Model) + "'";
-      break;
+  case properties::CameraLocationFront:
+    name = "Internal front camera";
+    break;
+  case properties::CameraLocationBack:
+    name = "Internal back camera";
+    break;
+  case properties::CameraLocationExternal:
+    name = "External camera";
+    if (props.contains(properties::Model))
+      name += " '" + props.get(properties::Model) + "'";
+    break;
   }
 
   name += " (" + camera->id() + ")";
@@ -347,8 +360,8 @@ int main() {
   /*
    * The Camera configuration procedure fails with invalid parameters.
    */
-  streamConfig.size.width = 640;   // 4096
-  streamConfig.size.height = 480;  // 2560
+  streamConfig.size.width = 640;  // 4096
+  streamConfig.size.height = 480; // 2560
   streamConfig.pixelFormat = libcamera::formats::BGR888;
 
   /*
@@ -468,7 +481,7 @@ int main() {
      */
     ControlList &controls = request->controls();
     // controls.set(controls::Brightness, 0.5);
-    int64_t frame_time = 1000000 / 60;  // in us
+    int64_t frame_time = 1000000 / 60; // in us
     controls.set(controls::FrameDurationLimits, {frame_time, frame_time});
 
     requests.push_back(std::move(request));
