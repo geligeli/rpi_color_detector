@@ -39,4 +39,5 @@ message(STATUS "    include path: ${LIBEVENT_PTHREAD_INCLUDE_DIRS}")
 include_directories(${CMAKE_SOURCE_DIR} ${LIBEVENT_PTHREAD_INCLUDE_DIRS})
 
 add_executable(color_detect color_detect.cpp)
+add_executable(servo_example servo_example.cpp)
 target_link_libraries(color_detect ${LIBEVENT_PTHREAD_LINK_LIBRARIES} ${LIBCAMERA_LINK_LIBRARIES})
