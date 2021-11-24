@@ -12,7 +12,7 @@ IF(Boost_FOUND)
     include_directories(${Boost_INCLUDE_DIRS})
 ENDIF(Boost_FOUND)
 
-add_compile_options(-g -O0 -Wall -Wextra -pedantic -Wno-unused-parameter -faligned-new -Werror -Wfatal-errors)
+add_compile_options(-O3 -Wall -Wextra -pedantic -Wno-unused-parameter -faligned-new -Werror -Wfatal-errors)
 add_definitions(-D_FILE_OFFSET_BITS=64)
 
 if (CMAKE_COMPILER_IS_GNUCXX)
@@ -28,24 +28,9 @@ IF (NOT ENABLE_COMPILE_FLAGS_FOR_TARGET)
 endif()
 message(STATUS "Platform: ${ENABLE_COMPILE_FLAGS_FOR_TARGET}")
 
-# add_definitions(-ftree-vectorize)
+add_definitions(-ftree-vectorize)
 
-find_package(PkgConfig)
-
-
-pkg_check_modules(LIBCAMERA libcamera)
-message(STATUS "libcamera library found:")
-message(STATUS "    version: ${LIBCAMERA_VERSION}")
-message(STATUS "    libraries: ${LIBCAMERA_LINK_LIBRARIES}")
-message(STATUS "    include path: ${LIBCAMERA_INCLUDE_DIRS}")
-include_directories(${CMAKE_SOURCE_DIR} ${LIBCAMERA_INCLUDE_DIRS})
-
-pkg_check_modules(LIBEVENT_PTHREAD libevent_pthreads)
-message(STATUS "libevent_pthreads library found:")
-message(STATUS "    version: ${LIBEVENT_PTHREAD_VERSION}")
-message(STATUS "    libraries: ${LIBEVENT_PTHREAD_LINK_LIBRARIES}")
-message(STATUS "    include path: ${LIBEVENT_PTHREAD_INCLUDE_DIRS}")
-include_directories(${CMAKE_SOURCE_DIR} ${LIBEVENT_PTHREAD_INCLUDE_DIRS})
+find_package(PkgConfig REQUIRED)
 
 add_subdirectory(http_server)
 add_executable(servo_example servo_example.cpp)
@@ -53,7 +38,21 @@ add_executable(http_server_main http_server_main.cpp)
 
 target_link_libraries(http_server_main LINK_PUBLIC http_server -lpthread)
 
-if (LIBCAMERA_FOUND AND LIBEVENT_PTHREAD_FOUND)
+pkg_check_modules(LIBCAMERA libcamera)
+message(STATUS "libcamera library found:")
+message(STATUS "    version: ${LIBCAMERA_VERSION}")
+message(STATUS "    libraries: ${LIBCAMERA_LINK_LIBRARIES}")
+message(STATUS "    include path: ${LIBCAMERA_INCLUDE_DIRS}")
+
+if (LIBCAMERA_FOUND)
+  include_directories(${CMAKE_SOURCE_DIR} ${LIBCAMERA_INCLUDE_DIRS})
+  pkg_check_modules(LIBEVENT_PTHREAD libevent_pthreads REQUIRED)
+  message(STATUS "libevent_pthreads library found:")
+  message(STATUS "    version: ${LIBEVENT_PTHREAD_VERSION}")
+  message(STATUS "    libraries: ${LIBEVENT_PTHREAD_LINK_LIBRARIES}")
+  message(STATUS "    include path: ${LIBEVENT_PTHREAD_INCLUDE_DIRS}")
+  include_directories(${CMAKE_SOURCE_DIR} ${LIBEVENT_PTHREAD_INCLUDE_DIRS})
+
   add_executable(color_detect color_detect.cpp)
   target_link_libraries(color_detect http_server -lpthread -lm ${LIBEVENT_PTHREAD_LINK_LIBRARIES} ${LIBCAMERA_LINK_LIBRARIES})
 endif()
