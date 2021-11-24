@@ -12,7 +12,7 @@ IF(Boost_FOUND)
     include_directories(${Boost_INCLUDE_DIRS})
 ENDIF(Boost_FOUND)
 
-add_compile_options(-Wall -Wextra -pedantic -Wno-unused-parameter -faligned-new -Werror -Wfatal-errors)
+add_compile_options(-g -O0 -Wall -Wextra -pedantic -Wno-unused-parameter -faligned-new -Werror -Wfatal-errors)
 add_definitions(-D_FILE_OFFSET_BITS=64)
 
 if (CMAKE_COMPILER_IS_GNUCXX)
@@ -53,4 +53,4 @@ add_executable(servo_example servo_example.cpp)
 add_executable(http_server_main http_server_main.cpp)
 
 target_link_libraries(http_server_main LINK_PUBLIC http_server -lpthread)
-target_link_libraries(color_detect -lpthread -lm ${LIBEVENT_PTHREAD_LINK_LIBRARIES} ${LIBCAMERA_LINK_LIBRARIES})
+target_link_libraries(color_detect http_server -lpthread -lm ${LIBEVENT_PTHREAD_LINK_LIBRARIES} ${LIBCAMERA_LINK_LIBRARIES})

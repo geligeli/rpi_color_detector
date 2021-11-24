@@ -5,10 +5,6 @@
 #include <sys/mman.h>
 
 #include <atomic>
-#include <boost/asio.hpp>
-#include <boost/beast/core.hpp>
-#include <boost/beast/http.hpp>
-#include <boost/beast/version.hpp>
 #include <chrono>
 #include <cstdlib>
 #include <cstring>
@@ -20,13 +16,11 @@
 #include <list>
 #include <memory>
 #include <mutex>
+#include <thread>
 #include <string>
 #include <unordered_map>
 
-namespace beast = boost::beast;   // from <boost/beast.hpp>
-namespace http = beast::http;     // from <boost/beast/http.hpp>
-namespace net = boost::asio;      // from <boost/asio.hpp>
-using tcp = boost::asio::ip::tcp; // from <boost/asio/ip/tcp.hpp>
+#include "http_server/http_server.h"
 
 class EventLoop {
 public:
@@ -249,6 +243,9 @@ std::string cameraName(Camera *camera) {
 }
 
 int main() {
+
+  std::thread http_server(run_server);
+
   std::unique_ptr<CameraManager> cm = std::make_unique<CameraManager>();
   cm->start();
 
