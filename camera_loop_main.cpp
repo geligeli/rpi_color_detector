@@ -2,8 +2,7 @@
 #include <iostream>
 
 #include <libcamera/libcamera.h>
-
-#include "http_server/http_server.h"
+#include <thread>
 #include "camera_loop/camera_loop.h"
 
 int main(int argc, char *argv[])
@@ -12,7 +11,7 @@ int main(int argc, char *argv[])
   {
     CameraLoop loop([](uint8_t *data, const libcamera::StreamConfiguration &config)
                     { std::cout << config.toString() << '\n'; });
-    run_server();
+    std::this_thread::sleep_for(std::chrono::seconds(100));
   }
   catch (std::exception const &e)
   {
