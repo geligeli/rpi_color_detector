@@ -1,5 +1,6 @@
 #include <exception>
 #include <iostream>
+#include <mutex>
 
 #include <libcamera/libcamera.h>
 
@@ -10,8 +11,31 @@ int main(int argc, char *argv[])
 {
   try
   {
-    CameraLoop loop([](uint8_t *data, const libcamera::StreamConfiguration &config)
-                    { std::cout << config.toString() << '\n'; });
+
+    std::mutex m;
+    ImagePtr img{nullptr, 0, 0};
+
+    OnAquireImage = [&]() -> const ImagePtr
+    {
+      m.lock();
+      return img;
+    };
+    OnReleaseImage = [&](const ImagePtr &)
+    {
+      m.unlock();
+    };
+
+    CameraLoop loop([&](uint8_t *data, const libcamera::StreamConfiguration &config)
+                    {
+                      if (!m.try_lock())
+                      {
+                        return;
+                      }
+                      img.data = data;
+                      img.h = config.size.height;
+                      img.w = config.size.width;
+                      m.unlock();
+                    });
     run_server();
   }
   catch (std::exception const &e)

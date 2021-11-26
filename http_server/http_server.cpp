@@ -19,42 +19,11 @@ namespace http = beast::http;     // from <boost/beast/http.hpp>
 namespace net = boost::asio;      // from <boost/asio.hpp>
 using tcp = boost::asio::ip::tcp; // from <boost/asio/ip/tcp.hpp>
 
+std::function<const ImagePtr()> OnAquireImage;
+std::function<void(const ImagePtr &)> OnReleaseImage;
+
 namespace my_program_state
 {
-  std::size_t request_count()
-  {
-    static std::size_t count = 0;
-    return ++count;
-  }
-
-  std::time_t now() { return std::time(0); }
-  /*
-std::string data;
-
-// std::vector<JOCTET> my_buffer;
-#define BLOCK_SIZE 16384
-
-void my_init_destination(j_compress_ptr cinfo)
-{
-    data.resize(BLOCK_SIZE);
-    cinfo->dest->next_output_byte = (JOCTET*)&data[0];
-    cinfo->dest->free_in_buffer = data.size();
-}
-
-boolean my_empty_output_buffer(j_compress_ptr cinfo)
-{
-    size_t oldsize = data.size();
-    data.resize(oldsize + BLOCK_SIZE);
-    cinfo->dest->next_output_byte = (JOCTET*)&data[oldsize];
-    cinfo->dest->free_in_buffer = data.size() - oldsize;
-    return true;
-}
-
-void my_term_destination(j_compress_ptr cinfo)
-{
-    data.resize(data.size() - cinfo->dest->free_in_buffer);
-}
-*/
 
   struct Result
   {
@@ -73,36 +42,28 @@ void my_term_destination(j_compress_ptr cinfo)
     struct jpeg_error_mgr jerr;        // In case of error.
     JSAMPROW row_pointer[1];           // Pointer to JSAMPLE row[s].
     int row_stride;                    // Physical row width in image buffer.
-
-    //## ALLOCATE AND INITIALIZE JPEG COMPRESSION OBJECT
-
     cinfo.err = jpeg_std_error(&jerr);
     jpeg_create_compress(&cinfo);
 
-    //## OPEN FILE FOR DATA DESTINATION:
-
-    // jpeg_stdio_dest(&cinfo, outfile);
-
     Result result;
     jpeg_mem_dest(&cinfo, &result.buf, &result.size);
-    /*cinfo.dest->init_destination = &my_init_destination;
-  cinfo.dest->empty_output_buffer = &my_empty_output_buffer;
-  cinfo.dest->term_destination = &my_term_destination; */
 
-    //## SET PARAMETERS FOR COMPRESSION:
+    auto image = OnAquireImage();
 
-    cinfo.image_width = 500;        // |-- Image width and height in pixels.
-    cinfo.image_height = 500;       // |
+    // cinfo.image_width = 500;        // |-- Image width and height in pixels.
+    // cinfo.image_height = 500;       // |
+    cinfo.image_width = image.w;
+    cinfo.image_height = image.h;
     cinfo.input_components = 3;     // Number of color components per pixel.
     cinfo.in_color_space = JCS_RGB; // Colorspace of input image as RGB.
 
     jpeg_set_defaults(&cinfo);
     jpeg_set_quality(&cinfo, quality, TRUE);
 
-    //## CREATE IMAGE BUFFER TO WRITE FROM AND MODIFY THE IMAGE TO LOOK LIKE CHECKERBOARD:
+    // Lock image/
 
-    unsigned char *image_buffer = NULL;
-    image_buffer = (unsigned char *)malloc(cinfo.image_width * cinfo.image_height * cinfo.num_components);
+    unsigned char *image_buffer = image.data; //NULL;
+                                              /*    image_buffer = (unsigned char *)malloc(cinfo.image_width * cinfo.image_height * cinfo.num_components);
 
     for (unsigned int y = 0; y < cinfo.image_height; ++y)
       for (unsigned int x = 0; x < cinfo.image_width; ++x)
@@ -121,7 +82,7 @@ void my_term_destination(j_compress_ptr cinfo)
           image_buffer[pixelIdx + 1] = 255; // g |   make this pixel white
           image_buffer[pixelIdx + 2] = 255; // b |   (255,255,255).
         }
-      }
+      }*/
 
     //## START COMPRESSION:
 
@@ -141,7 +102,8 @@ void my_term_destination(j_compress_ptr cinfo)
 
     jpeg_finish_compress(&cinfo);
     jpeg_destroy_compress(&cinfo);
-
+    // unlock compress.
+    OnReleaseImage(image);
     std::string buffer;
     buffer.resize(result.size);
     std::copy(result.buf, result.buf + result.size, buffer.begin());
@@ -225,33 +187,7 @@ private:
   // Construct a response message based on the program state.
   void create_response()
   {
-    if (request_.target() == "/count")
-    {
-      response_.set(http::field::content_type, "text/html");
-      beast::ostream(response_.body())
-          << "<html>\n"
-          << "<head><title>Request count</title></head>\n"
-          << "<body>\n"
-          << "<h1>Request count</h1>\n"
-          << "<p>There have been " << my_program_state::request_count()
-          << " requests so far.</p>\n"
-          << "</body>\n"
-          << "</html>\n";
-    }
-    else if (request_.target() == "/time")
-    {
-      response_.set(http::field::content_type, "text/html");
-      beast::ostream(response_.body())
-          << "<html>\n"
-          << "<head><title>Current time</title></head>\n"
-          << "<body>\n"
-          << "<h1>Current time</h1>\n"
-          << "<p>The current time is " << my_program_state::now()
-          << " seconds since the epoch.</p>\n"
-          << "</body>\n"
-          << "</html>\n";
-    }
-    else if (request_.target() == "/img")
+    if (request_.target() == "/img")
     {
       response_.set(http::field::content_type, "image/jpeg");
       beast::ostream(response_.body()) << my_program_state::imgdata(); // my_program_state::data;

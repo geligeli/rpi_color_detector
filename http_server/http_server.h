@@ -1,11 +1,16 @@
 #pragma once
 
 #include <string>
+#include <functional>
 
 void run_server();
 
-namespace my_program_state {
+struct ImagePtr
+{
+  unsigned char *data;
+  int h;
+  int w;
+};
 
-std::string imgdata();
-
-} // namespace my_program_state
+extern std::function<const ImagePtr()> OnAquireImage;
+extern std::function<void(const ImagePtr &)> OnReleaseImage;
