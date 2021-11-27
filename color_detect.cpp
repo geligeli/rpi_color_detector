@@ -58,8 +58,8 @@ int main(int argc, char *argv[]) {
 
     int i{0};
     do {
-      std::ifstream("/sys/class/pwm/pwmchip0/pwm0/duty_cycle") >> i;
-      std::this_thread::sleep_for(std::chrono::milliseconds(1));
+      std::ifstream("/sys/class/pwm/pwmchip0/pwm0/enable") >> i;
+      std::this_thread::sleep_for(std::chrono::seconds(1));
     } while (i==0);
 
     std::mutex m;
