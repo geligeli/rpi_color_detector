@@ -71,5 +71,7 @@
     "typeinfo": "cpp",
     "variant": "cpp",
     "*.ipp": "cpp"
-  }
+  },
+  "editor.fontFamily": "Fira Code",
+  "editor.fontLigatures": true,
 }

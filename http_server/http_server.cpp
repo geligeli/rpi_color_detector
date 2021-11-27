@@ -21,6 +21,7 @@ using tcp = boost::asio::ip::tcp; // from <boost/asio/ip/tcp.hpp>
 
 std::function<const ImagePtr()> OnAquireImage;
 std::function<void(const ImagePtr &)> OnReleaseImage;
+std::function<void(std::string key)> OnKeyPress;
 
 namespace my_program_state
 {
@@ -187,16 +188,54 @@ private:
   // Construct a response message based on the program state.
   void create_response()
   {
-    if (request_.target() == "/img")
-    {
+    std::cout << request_.target() << std::endl;
+    if (request_.target().starts_with("/press?k=")) {
+      if (OnKeyPress) {
+        OnKeyPress(std::string(request_.target().substr(std::string("/press?k=").size())));
+      }
+      std::this_thread::sleep_for(std::chrono::seconds(2));
+      response_.set(http::field::content_type, "application/json");
+      beast::ostream(response_.body()) << R"""(
+        {
+          "foo" : "bar"
+        }
+      )""";
+    } else if (request_.target().starts_with("/img")) {
       response_.set(http::field::content_type, "image/jpeg");
       beast::ostream(response_.body()) << my_program_state::imgdata(); // my_program_state::data;
     }
     else
     {
-      response_.result(http::status::not_found);
-      response_.set(http::field::content_type, "text/plain");
-      beast::ostream(response_.body()) << "File not found\r\n";
+      // response_.result(http::status::not_found);
+      response_.set(http::field::content_type, "text/html");
+      beast::ostream(response_.body()) << R"""(
+        <html>
+        <head>
+          <script>
+            function keypress(e) {
+              document.removeEventListener('keypress', keypress);
+              var xhr = new XMLHttpRequest();
+              xhr.open("GET", "/press?k="+e.code, true);
+              xhr.setRequestHeader('Content-Type', 'application/json');
+              xhr.onreadystatechange = function () {
+                  if (this.readyState != 4) return;
+                  if (this.status == 200) {
+                      var data = JSON.parse(this.responseText);
+                      document.getElementById("viewport").src = "/img?" + new Date().getTime();
+                      // we get the returned data
+                  }
+                  document.addEventListener('keypress', keypress);
+              };
+              xhr.send();
+            }
+            document.addEventListener('keypress', keypress);
+          </script>
+        </head>
+        <body>
+          <img id="viewport" src="/img">
+        </body>
+        </html>
+        )""";
     }
   }
 
