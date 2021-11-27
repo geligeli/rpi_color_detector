@@ -79,12 +79,12 @@ int main(int argc, char *argv[]) {
       }
       if (key == "KeyD") {
         std::ofstream("/sys/class/pwm/pwmchip0/pwm0/duty_cycle") << "1700000";
-        std::this_thread::sleep_for(std::chrono::miliseconds(500));
+        std::this_thread::sleep_for(std::chrono::milliseconds(500));
         std::ofstream("/sys/class/pwm/pwmchip0/pwm0/duty_cycle") << "1500000";
       }
       if (key == "KeyA") {
         std::ofstream("/sys/class/pwm/pwmchip0/pwm0/duty_cycle") << "1300000";
-        std::this_thread::sleep_for(std::chrono::miliseconds(500));
+        std::this_thread::sleep_for(std::chrono::milliseconds(500));
         std::ofstream("/sys/class/pwm/pwmchip0/pwm0/duty_cycle") << "1500000";
       }
     };
