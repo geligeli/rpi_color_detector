@@ -52,9 +52,9 @@ int main(int argc, char *argv[]) {
         std::terminate();
       }
     }
+    std::ofstream("/sys/class/pwm/pwmchip0/pwm0/enable") << "1";
     std::ofstream("/sys/class/pwm/pwmchip0/pwm0/period") << "50000000";
     std::ofstream("/sys/class/pwm/pwmchip0/pwm0/duty_cycle") << "1500000";
-    std::ofstream("/sys/class/pwm/pwmchip0/pwm0/enable") << "1";
 
     std::mutex m;
     ImagePtr img{nullptr, 0, 0};
