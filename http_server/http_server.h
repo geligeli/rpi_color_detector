@@ -14,4 +14,5 @@ struct ImagePtr
 
 extern std::function<const ImagePtr()> OnAquireImage;
 extern std::function<void(const ImagePtr &)> OnReleaseImage;
+extern std::function<void(const std::string&)> OnImageCompressed;
 extern std::function<void(std::string)> OnKeyPress;

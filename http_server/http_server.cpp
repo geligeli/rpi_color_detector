@@ -21,6 +21,7 @@ using tcp = boost::asio::ip::tcp; // from <boost/asio/ip/tcp.hpp>
 
 std::function<const ImagePtr()> OnAquireImage;
 std::function<void(const ImagePtr &)> OnReleaseImage;
+std::function<void(const std::string&)> OnImageCompressed;
 std::function<void(std::string key)> OnKeyPress;
 
 namespace my_program_state
@@ -202,7 +203,11 @@ private:
       )""";
     } else if (request_.target().starts_with("/img")) {
       response_.set(http::field::content_type, "image/jpeg");
-      beast::ostream(response_.body()) << my_program_state::imgdata(); // my_program_state::data;
+      std::string s = my_program_state::imgdata(); // my_program_state::data;
+      if (OnImageCompressed) {
+        OnImageCompressed(s);
+      }
+      beast::ostream(response_.body()) << s;
     }
     else
     {
