@@ -56,6 +56,12 @@ int main(int argc, char *argv[]) {
     std::ofstream("/sys/class/pwm/pwmchip0/pwm0/period") << "50000000";
     std::ofstream("/sys/class/pwm/pwmchip0/pwm0/duty_cycle") << "1500000";
 
+    int i{0};
+    do {
+      std::ifstream("/sys/class/pwm/pwmchip0/pwm0/duty_cycle") >> i;
+      std::this_thread::sleep_for(std::chrono::milliseconds(1));
+    } while (i==0);
+
     std::mutex m;
     ImagePtr img{nullptr, 0, 0};
 
