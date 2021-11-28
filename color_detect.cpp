@@ -60,7 +60,11 @@ int main(int argc, char *argv[]) {
     do {
       std::ifstream("/sys/class/pwm/pwmchip0/pwm0/enable") >> i;
       std::this_thread::sleep_for(std::chrono::seconds(1));
-    } while (i==0);
+      if (i == 1) {
+        break;
+      }
+      std::ofstream("/sys/class/pwm/pwmchip0/pwm0/enable") << "1";
+    } while (true);
 
     std::mutex m;
     ImagePtr img{nullptr, 0, 0};
@@ -85,12 +89,12 @@ int main(int argc, char *argv[]) {
       }
       if (key == "KeyD") {
         std::ofstream("/sys/class/pwm/pwmchip0/pwm0/duty_cycle") << "1700000";
-        std::this_thread::sleep_for(std::chrono::milliseconds(500));
+        std::this_thread::sleep_for(std::chrono::milliseconds(800));
         std::ofstream("/sys/class/pwm/pwmchip0/pwm0/duty_cycle") << "1500000";
       }
       if (key == "KeyA") {
         std::ofstream("/sys/class/pwm/pwmchip0/pwm0/duty_cycle") << "1300000";
-        std::this_thread::sleep_for(std::chrono::milliseconds(500));
+        std::this_thread::sleep_for(std::chrono::milliseconds(800));
         std::ofstream("/sys/class/pwm/pwmchip0/pwm0/duty_cycle") << "1500000";
       }
     };
