@@ -51,3 +51,6 @@ message(STATUS "    include path: ${LIBCAMERA_INCLUDE_DIRS}")
 include_directories(${CMAKE_SOURCE_DIR} ${LIBCAMERA_INCLUDE_DIRS})
 add_executable(color_detect color_detect.cpp)
 target_link_libraries(color_detect http_server camera_loop ${LIBCAMERA_LINK_LIBRARIES})
+
+add_executable(stepper_example stepper_example.cpp)
+target_link_libraries(stepper_example -lpthread -lpigpio -lrt)
