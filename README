@@ -1,3 +1,4 @@
+sudo apt-get install libboost-all-dev cmake build-essential g++ libjpeg-dev libcamera-dev pigpio-tools pigpio
 mkdir build
 cd build
 cmake ..
