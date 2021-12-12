@@ -1,0 +1,34 @@
+<html>
+<head>
+    <script>
+    function keypress(e) {
+        // document.removeEventListener('keypress', keypress);
+        var xhr = new XMLHttpRequest();
+        xhr.open("GET", "/press?k="+e.code, true);
+        xhr.setRequestHeader('Content-Type', 'application/json');
+        // xhr.onreadystatechange = function () {
+        //     if (this.readyState != 4) return;
+        //     if (this.status == 200) {
+        //         var data = JSON.parse(this.responseText);
+        //         document.getElementById("viewport").src = "/img?" + new Date().getTime();
+        //         // we get the returned data
+        //     }
+        //     document.addEventListener('keypress', keypress);
+        // };
+        xhr.send();
+    }
+    document.addEventListener('keypress', keypress);
+    </script>
+</head>
+<body>
+    <img id="viewport" src="img">
+    <script>
+    function reload() {
+        img=document.getElementById("viewport");
+        img.src = "img?"+Date.now();
+        setTimeout(reload, 100);
+    }
+    reload();
+</script>
+</body>
+</html>

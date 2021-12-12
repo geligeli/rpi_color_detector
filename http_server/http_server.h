@@ -2,8 +2,9 @@
 
 #include <string>
 #include <functional>
+#include <filesystem>
 
-void run_server();
+void run_server(std::filesystem::path root, unsigned short port=8888);
 
 struct ImagePtr
 {

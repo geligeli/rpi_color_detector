@@ -1,4 +1,5 @@
 #include <libcamera/libcamera.h>
+#include <pigpio.h>
 
 #include <chrono>
 #include <cstdio>
@@ -43,28 +44,39 @@ struct JpegBuffer {
   std::mutex m;
 };
 
+
+void Step(int v) {
+  if (v < 0) {
+    gpioWrite(24, 1);
+  } else {
+    gpioWrite(24, 0);
+  }
+
+  using namespace std::literals::chrono_literals;
+
+  for (int i = 0; i < std::abs(v); ++i)
+  {
+    gpioWrite(23, 1);
+    std::this_thread::sleep_for(10ms);
+    gpioWrite(23, 0);
+    std::this_thread::sleep_for(10ms);
+  }
+}
+
+
+
 int main(int argc, char *argv[]) {
   try {
-    // if (!fs::exists("/sys/class/pwm/pwmchip0/pwm0")) {
-    //   std::ofstream("/sys/class/pwm/pwmchip0/export") << "0";
-    //   if (!fs::exists("/sys/class/pwm/pwmchip0/pwm0")) {
-    //     std::cerr << "was not able to export pwm0 device" << std::endl;
-    //     std::terminate();
-    //   }
-    // }
-    // std::ofstream("/sys/class/pwm/pwmchip0/pwm0/enable") << "1";
-    // std::ofstream("/sys/class/pwm/pwmchip0/pwm0/period") << "50000000";
-    // std::ofstream("/sys/class/pwm/pwmchip0/pwm0/duty_cycle") << "1500000";
-
-    // int i{0};
-    // do {
-    //   std::ifstream("/sys/class/pwm/pwmchip0/pwm0/enable") >> i;
-    //   std::this_thread::sleep_for(std::chrono::seconds(1));
-    //   if (i == 1) {
-    //     break;
-    //   }
-    //   std::ofstream("/sys/class/pwm/pwmchip0/pwm0/enable") << "1";
-    // } while (true);
+    if (gpioInitialise() < 0)
+    {
+      // pigpio initialisation failed.
+      std::cerr << "pigpio initialisation failed.\n";
+      return EXIT_FAILURE;
+    }
+    gpioSetMode(23, PI_OUTPUT); // Set GPIO17 as input.
+    gpioSetMode(24, PI_OUTPUT); // Set GPIO18 as output.
+    gpioWrite(23, 0);
+    gpioWrite(24, 0);
 
     std::mutex m;
     ImagePtr img{nullptr, 0, 0};
@@ -82,20 +94,24 @@ int main(int argc, char *argv[]) {
     OnKeyPress = [&, counter = 0](const std::string &key) mutable {
       std::cerr<<key;
       if (key == "KeyD" || key == "KeyA") {
-        std::filesystem::create_directories(key);
-        if (buf.save(key + "/" + std::to_string(counter) + ".jpg")) {
-          ++counter;
-        }
+        // std::filesystem::create_directories(key);
+        // if (buf.save(key + "/" + std::to_string(counter) + ".jpg")) {
+        //   ++counter;
+        // }
       }
       if (key == "KeyD") {
-        std::ofstream("/sys/class/pwm/pwmchip0/pwm0/duty_cycle") << "1700000";
-        std::this_thread::sleep_for(std::chrono::milliseconds(800));
-        std::ofstream("/sys/class/pwm/pwmchip0/pwm0/duty_cycle") << "1500000";
+        Step(-1);
+
+        // std::ofstream("/sys/class/pwm/pwmchip0/pwm0/duty_cycle") << "1700000";
+        // std::this_thread::sleep_for(std::chrono::milliseconds(800));
+        // std::ofstream("/sys/class/pwm/pwmchip0/pwm0/duty_cycle") << "1500000";
       }
       if (key == "KeyA") {
-        std::ofstream("/sys/class/pwm/pwmchip0/pwm0/duty_cycle") << "1300000";
-        std::this_thread::sleep_for(std::chrono::milliseconds(800));
-        std::ofstream("/sys/class/pwm/pwmchip0/pwm0/duty_cycle") << "1500000";
+        Step(1);
+
+        // std::ofstream("/sys/class/pwm/pwmchip0/pwm0/duty_cycle") << "1300000";
+        // std::this_thread::sleep_for(std::chrono::milliseconds(800));
+        // std::ofstream("/sys/class/pwm/pwmchip0/pwm0/duty_cycle") << "1500000";
       }
     };
 
@@ -109,7 +125,9 @@ int main(int argc, char *argv[]) {
           img.w = config.size.width;
           m.unlock();
         });
-    run_server();
+    if (argc > 2) {
+      run_server(argv[1], std::atoi(argv[2]));
+    }
   } catch (std::exception const &e) {
     std::cerr << "Error: " << e.what() << std::endl;
     return EXIT_FAILURE;
