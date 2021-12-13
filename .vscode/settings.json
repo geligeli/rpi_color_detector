@@ -70,7 +70,10 @@
     "typeindex": "cpp",
     "typeinfo": "cpp",
     "variant": "cpp",
-    "*.ipp": "cpp"
+    "*.ipp": "cpp",
+    "any": "cpp",
+    "coroutine": "cpp",
+    "source_location": "cpp"
   },
   "editor.fontFamily": "Fira Code",
   "editor.fontLigatures": true,

@@ -44,37 +44,31 @@ struct JpegBuffer {
   std::mutex m;
 };
 
-
-void Step(int v) {
+void Step(int v, std::chrono::microseconds stepTime = std::chrono::microseconds{
+                     20000}) {
   if (v < 0) {
     gpioWrite(24, 1);
   } else {
     gpioWrite(24, 0);
   }
 
-  using namespace std::literals::chrono_literals;
-
-  for (int i = 0; i < std::abs(v); ++i)
-  {
+  for (int i = 0; i < std::abs(v); ++i) {
     gpioWrite(23, 1);
-    std::this_thread::sleep_for(10ms);
+    std::this_thread::sleep_for(stepTime / 2);
     gpioWrite(23, 0);
-    std::this_thread::sleep_for(10ms);
+    std::this_thread::sleep_for(stepTime / 2);
   }
 }
 
-
-
 int main(int argc, char *argv[]) {
   try {
-    if (gpioInitialise() < 0)
-    {
+    if (gpioInitialise() < 0) {
       // pigpio initialisation failed.
       std::cerr << "pigpio initialisation failed.\n";
       return EXIT_FAILURE;
     }
-    gpioSetMode(23, PI_OUTPUT); // Set GPIO17 as input.
-    gpioSetMode(24, PI_OUTPUT); // Set GPIO18 as output.
+    gpioSetMode(23, PI_OUTPUT);  // Set GPIO17 as input.
+    gpioSetMode(24, PI_OUTPUT);  // Set GPIO18 as output.
     gpioWrite(23, 0);
     gpioWrite(24, 0);
 
@@ -92,26 +86,24 @@ int main(int argc, char *argv[]) {
     OnImageCompressed = [&](const std::string &s) { buf.store(s); };
 
     OnKeyPress = [&, counter = 0](const std::string &key) mutable {
-      std::cerr<<key;
+      std::cerr << key;
       if (key == "KeyD" || key == "KeyA") {
-        // std::filesystem::create_directories(key);
-        // if (buf.save(key + "/" + std::to_string(counter) + ".jpg")) {
-        //   ++counter;
-        // }
+        std::filesystem::create_directories(key);
+        if (buf.save(key + "/" + std::to_string(counter) + ".jpg")) {
+          ++counter;
+        }
       }
+      using namespace std::literals::chrono_literals;
       if (key == "KeyD") {
+        Step(-200, 1ms);
+        Step(200, 1ms);
+      } else if (key == "KeyA") {
+        Step(200, 1ms);
+        Step(-200, 1ms);
+      } else if (key == "KeyE") {
         Step(-1);
-
-        // std::ofstream("/sys/class/pwm/pwmchip0/pwm0/duty_cycle") << "1700000";
-        // std::this_thread::sleep_for(std::chrono::milliseconds(800));
-        // std::ofstream("/sys/class/pwm/pwmchip0/pwm0/duty_cycle") << "1500000";
-      }
-      if (key == "KeyA") {
+      } else if (key == "KeyQ") {
         Step(1);
-
-        // std::ofstream("/sys/class/pwm/pwmchip0/pwm0/duty_cycle") << "1300000";
-        // std::this_thread::sleep_for(std::chrono::milliseconds(800));
-        // std::ofstream("/sys/class/pwm/pwmchip0/pwm0/duty_cycle") << "1500000";
       }
     };
 
