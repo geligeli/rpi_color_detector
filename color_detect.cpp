@@ -1,6 +1,7 @@
 #include <libcamera/libcamera.h>
 #include <pigpio.h>
 
+#include <atomic>
 #include <chrono>
 #include <cstdio>
 #include <cstdlib>
@@ -15,6 +16,7 @@
 #include "http_server/http_server.h"
 
 namespace fs = std::filesystem;
+using namespace std::literals::chrono_literals;
 
 struct JpegBuffer {
  public:
@@ -72,6 +74,21 @@ int main(int argc, char *argv[]) {
     gpioWrite(23, 0);
     gpioWrite(24, 0);
 
+    std::atomic<bool> spillThreadRunning{true};
+
+    auto spill = [&spillThreadRunning]() {
+      while (spillThreadRunning.load()) {
+        Step(-200, 2ms);
+        std::this_thread::sleep_for(100ms);
+        Step(200, 2ms);
+        std::this_thread::sleep_for(100ms);
+        // Step(200, 2ms);
+        // Step(-200, 2ms);
+      }
+    };
+
+    std::thread spillThread;
+
     std::mutex m;
     ImagePtr img{nullptr, 0, 0};
 
@@ -93,7 +110,6 @@ int main(int argc, char *argv[]) {
           ++counter;
         }
       }
-      using namespace std::literals::chrono_literals;
       if (key == "KeyD") {
         Step(-200, 1ms);
         Step(200, 1ms);
@@ -104,6 +120,16 @@ int main(int argc, char *argv[]) {
         Step(-1);
       } else if (key == "KeyQ") {
         Step(1);
+      } else if (key == "KeyF") {
+        spillThreadRunning = true;
+        if (!spillThread.joinable()) {
+          spillThread = std::thread(spill);
+        }
+      } else if (key == "KeyG") {
+        spillThreadRunning = false;
+        if (spillThread.joinable()) {
+          spillThread.join();
+        }
       }
     };
 
