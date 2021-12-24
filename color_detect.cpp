@@ -64,6 +64,7 @@ void Step(int v, std::chrono::microseconds stepTime = std::chrono::microseconds{
 
 int main(int argc, char *argv[]) {
   try {
+    // Note this binds to port 8888!!
     if (gpioInitialise() < 0) {
       // pigpio initialisation failed.
       std::cerr << "pigpio initialisation failed.\n";
@@ -78,10 +79,10 @@ int main(int argc, char *argv[]) {
 
     auto spill = [&spillThreadRunning]() {
       while (spillThreadRunning.load()) {
-        Step(-200, 2ms);
-        std::this_thread::sleep_for(100ms);
-        Step(200, 2ms);
-        std::this_thread::sleep_for(100ms);
+        Step(-89, 2ms);
+        std::this_thread::sleep_for(200ms);
+        Step(89, 2ms);
+        std::this_thread::sleep_for(200ms);
         // Step(200, 2ms);
         // Step(-200, 2ms);
       }
@@ -102,20 +103,24 @@ int main(int argc, char *argv[]) {
 
     OnImageCompressed = [&](const std::string &s) { buf.store(s); };
 
-    OnKeyPress = [&, counter = 0](const std::string &key) mutable {
-      std::cerr << key;
+    OnKeyPress = [&](const std::string &key) mutable {
       if (key == "KeyD" || key == "KeyA") {
-        std::filesystem::create_directories(key);
-        if (buf.save(key + "/" + std::to_string(counter) + ".jpg")) {
-          ++counter;
-        }
+        const auto outDir = std::filesystem::path("/nfs/general/shared") / key;
+        std::filesystem::create_directories(outDir);
+        const auto msSinceEpoch =
+            std::chrono::duration_cast<std::chrono::milliseconds>(
+                std::chrono::system_clock::now().time_since_epoch())
+                .count();
+        buf.save((outDir / (std::to_string(msSinceEpoch) + ".jpg")));
       }
       if (key == "KeyD") {
-        Step(-200, 1ms);
-        Step(200, 1ms);
+        Step(-89, 2ms);
+        std::this_thread::sleep_for(200ms);
+        Step(89, 2ms);
       } else if (key == "KeyA") {
-        Step(200, 1ms);
-        Step(-200, 1ms);
+        Step(89, 2ms);
+        std::this_thread::sleep_for(200ms);
+        Step(-89, 2ms);
       } else if (key == "KeyE") {
         Step(-1);
       } else if (key == "KeyQ") {
