@@ -79,10 +79,10 @@ int main(int argc, char *argv[]) {
 
     auto spill = [&spillThreadRunning]() {
       while (spillThreadRunning.load()) {
-        Step(-89, 2ms);
-        std::this_thread::sleep_for(200ms);
-        Step(89, 2ms);
-        std::this_thread::sleep_for(200ms);
+        Step(-1, 20ms);
+        // std::this_thread::sleep_for(400ms);
+        // Step(89, 2ms);
+        // std::this_thread::sleep_for(400ms);
         // Step(200, 2ms);
         // Step(-200, 2ms);
       }
@@ -114,13 +114,9 @@ int main(int argc, char *argv[]) {
         buf.save((outDir / (std::to_string(msSinceEpoch) + ".jpg")));
       }
       if (key == "KeyD") {
-        Step(-89, 2ms);
-        std::this_thread::sleep_for(200ms);
-        Step(89, 2ms);
+        Step(-80, 4ms);
       } else if (key == "KeyA") {
-        Step(89, 2ms);
-        std::this_thread::sleep_for(200ms);
-        Step(-89, 2ms);
+        Step(80, 4ms);
       } else if (key == "KeyE") {
         Step(-1);
       } else if (key == "KeyQ") {
