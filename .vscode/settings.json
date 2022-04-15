@@ -77,4 +77,6 @@
   },
   "editor.fontFamily": "Fira Code",
   "editor.fontLigatures": true,
+  "docker.commands.build": "docker build --pull --rm -f \"${dockerfile}\" -t ${tag} \"${context}\"",
+  "jupyter.widgetScriptSources": [ "jsdelivr.com", "unpkg.com"],
 }
