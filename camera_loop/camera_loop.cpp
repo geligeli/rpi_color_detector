@@ -134,6 +134,9 @@ CameraLoop::CameraLoop(std::function<void(uint8_t *data, const libcamera::Stream
     // controls.set(controls::Brightness, 0.5);
     int64_t frame_time = 1000000 / 60; // in us
     controls.set(controls::FrameDurationLimits, {frame_time, frame_time});
+    controls.set(controls::AeEnable, false);
+    controls.set(controls::AnalogueGain, 10);
+    
 
     requests.push_back(std::move(request));
   }
