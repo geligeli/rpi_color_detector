@@ -61,4 +61,8 @@ float Classifier::Classify(unsigned char const* data, int h, int w) const {
   // return r;
 }
 
+Classifier::~Classifier() {
+  std::cerr << "booooooooooooooom" << std::endl;
+}
+
 }  // namespace cpp_classifier
