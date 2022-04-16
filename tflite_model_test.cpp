@@ -16,7 +16,12 @@ int main() {
 
   TfLiteInterpreterAllocateTensors(interpreter);
 
-  TfLiteTensor *inputTensor = TfLiteInterpreterGetInputTensor(interpreter, 0);
+  TfLiteTensor *inputTensor = nullptr;
+  std::thread t([&](){
+    inputTensor = TfLiteInterpreterGetInputTensor(interpreter, 0);
+  });
+
+  t.join();
 
   std::cout << TfLiteTypeGetName(inputTensor->type) << std::endl;
   std::cout << inputTensor->name << std::endl;
