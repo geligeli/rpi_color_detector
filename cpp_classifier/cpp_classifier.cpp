@@ -67,6 +67,7 @@ float Classifier::Classify(unsigned char const* data, int h, int w) const {
   //   r += data[c.x*3*w + c.y*3 + c.c]*c.coef;
   // }
   // return r;
+  return 0;
 }
 
 Classifier::~Classifier() {
