@@ -38,7 +38,7 @@ int main() {
 
   for (int j = 0; j < 5; ++j) {
     const auto start = std::chrono::system_clock::now();
-    std::vector<uint8_t> data(640*480*3)
+    std::vector<uint8_t> data(640*480*3);
     TfLiteTensorCopyFromBuffer(inputTensor, data.data(), data.size());
     TfLiteInterpreterInvoke(interpreter);
     // float y[1];
