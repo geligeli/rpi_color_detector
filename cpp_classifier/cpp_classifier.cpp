@@ -16,7 +16,7 @@ void Classifier::LoadFromFile(const std::string& fn) {
   model = {TfLiteModelCreateFromFile(fn.c_str()), TfLiteModelDelete}; // "/nfs/general/shared/adder.tflite");
 
   options = {TfLiteInterpreterOptionsCreate(), TfLiteInterpreterOptionsDelete};
-  TfLiteInterpreterOptionsSetNumThreads(options, numThreads);
+  TfLiteInterpreterOptionsSetNumThreads(options.get(), numThreads);
   interpreter = {T}fLiteInterpreterCreate(model, options), TfLiteInterpreterDelete}
 
   // TfLiteInterpreterAllocateTensors(interpreter);
