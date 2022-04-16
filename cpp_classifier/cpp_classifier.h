@@ -8,9 +8,9 @@
 namespace cpp_classifier {
 
 struct Classifier {
-  std::unique_ptr<TfLiteInterpreter, TfLiteInterpreterDelete> interpreter;
-  std::unique_ptr<TfLiteInterpreterOptions, TfLiteInterpreterDelete> options;
-  std::unique_ptr<TfLiteModel, TfLiteModelDelete> model;
+  std::unique_ptr<TfLiteInterpreter,  void(*)(TfLiteInterpreter*)> interpreter;
+  std::unique_ptr<TfLiteInterpreterOptions,  void(*)(TfLiteInterpreterOptions*)> options;
+  std::unique_ptr<TfLiteModel, void(*)(TfLiteModel*)> model;
 
 
 
