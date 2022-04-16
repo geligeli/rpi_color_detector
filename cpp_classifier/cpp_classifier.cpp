@@ -14,7 +14,8 @@ Classifier::Classifier(const std::string& fn) {
   TfLiteInterpreterOptionsSetNumThreads(options.get(), 4);
   interpreter = {TfLiteInterpreterCreate(model.get(), options.get()), TfLiteInterpreterDelete};
 
-  // TfLiteInterpreterAllocateTensors(interpreter);
+  auto* inputTensor = TfLiteInterpreterGetInputTensor(interpreter.get(), 0);
+  const auto* outputTensor = TfLiteInterpreterGetOutputTensor(interpreter.get(), 0);
 
   std::cout << "Input tensor type=";
   std::cout << TfLiteTypeGetName(inputTensor->type) << std::endl;
@@ -29,8 +30,8 @@ Classifier::Classifier(const std::string& fn) {
 }
 
 float Classifier::Classify(unsigned char const* data, int h, int w) const {
-  inputTensor = TfLiteInterpreterGetInputTensor(interpreter.get(), 0);
-  outputTensor = TfLiteInterpreterGetOutputTensor(interpreter.get(), 0);
+  auto* inputTensor = TfLiteInterpreterGetInputTensor(interpreter.get(), 0);
+  const auto* outputTensor = TfLiteInterpreterGetOutputTensor(interpreter.get(), 0);
 
   std::cerr << "copy data" << std::endl;
   TfLiteTensorCopyFromBuffer(inputTensor, data, h*w*3);
