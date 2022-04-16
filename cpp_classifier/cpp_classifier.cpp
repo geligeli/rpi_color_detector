@@ -19,20 +19,20 @@ void Classifier::LoadFromFile(const std::string& fn) {
   inputTensor = TfLiteInterpreterGetInputTensor(interpreter.get(), 0);
   outputTensor = TfLiteInterpreterGetOutputTensor(interpreter.get(), 0);
 
-  // std::cout << TfLiteTypeGetName(inputTensor->type) << std::endl;
-  // std::cout << inputTensor->name << std::endl;
-  // std::cout << inputTensor->dims->size << std::endl;
-
-  // for (int i = 0; i < inputTensor->dims->size; ++i) {
-  //   std::cout << inputTensor->dims->data[i] << std::endl;
-  // }
+  std::cout << "Input tensor type="
+  std::cout << TfLiteTypeGetName(inputTensor->type) << std::endl;
+  for (int i = 0; i < inputTensor->dims->size; ++i) {
+    std::cout << "dim[" << i << "]=" << inputTensor->dims->data[i] << std::endl;
+  }
 
   // const TfLiteTensor *outputTensor =
   // TfLiteInterpreterGetOutputTensor(interpreter, 0);
 
-  // std::cout << TfLiteTypeGetName(outputTensor->type) << std::endl;
-  // std::cout << outputTensor->name << std::endl;
-  // std::cout << outputTensor->dims->size << std::endl;
+  std::cout << "Output tensor type="
+  std::cout << TfLiteTypeGetName(outputTensor->type) << std::endl;
+  for (int i = 0; i < outputTensor->dims->size; ++i) {
+    std::cout << "dim[" << i << "]=" << outputTensor->dims->data[i] << std::endl;
+  }
 
     // TfLiteTensorCopyToBuffer(outputTensor, y, sizeof(y));
 
