@@ -69,8 +69,7 @@ void Step(int v, std::chrono::microseconds stepTime = std::chrono::microseconds{
 }
 
 int main(int argc, char *argv[]) {
-  cpp_classifier::Classifier classifier;
-  classifier.LoadFromFile("/nfs/general/shared/adder.tflite");
+  cpp_classifier::Classifier classifier("/nfs/general/shared/adder.tflite")
   try {
     // Note this binds to port 8888!!
     if (gpioInitialise() < 0) {

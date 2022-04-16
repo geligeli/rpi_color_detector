@@ -8,7 +8,7 @@
 
 namespace cpp_classifier {
 
-void Classifier::LoadFromFile(const std::string& fn) {
+void Classifier::Classifier(const std::string& fn) {
   model = {TfLiteModelCreateFromFile(fn.c_str()), TfLiteModelDelete}; // "/nfs/general/shared/adder.tflite");
   options = {TfLiteInterpreterOptionsCreate(), TfLiteInterpreterOptionsDelete};
   TfLiteInterpreterOptionsSetNumThreads(options.get(), 4);
@@ -62,6 +62,7 @@ void Classifier::LoadFromFile(const std::string& fn) {
 }
 
 float Classifier::Classify(unsigned char const* data, int h, int w) const {
+  
   TfLiteTensorCopyFromBuffer(inputTensor, data, h*w*3);
   TfLiteInterpreterInvoke(interpreter.get());
   float y[2];
