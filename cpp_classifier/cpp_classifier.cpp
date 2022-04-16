@@ -33,7 +33,7 @@ Classifier::Classifier(const std::string& fn) {
 
 float Classifier::Classify(unsigned char const* data, int h, int w) const {
   std::cerr << "copy data" << std::endl;
-  TfLiteTensorCopyFromBuffer(inputTensor, data, h*w*3);
+  TfLiteTensorCopyFromBuffer(inputTensor, data, h*w);
   std::cerr << "call interpreter" << std::endl;
   TfLiteInterpreterInvoke(interpreter.get());
   float y[2];

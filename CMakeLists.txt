@@ -2,8 +2,8 @@ cmake_minimum_required(VERSION 3.6)
 
 project(color-detect)
 
-add_compile_options(-fsanitize=address)
-add_link_options(-fsanitize=address)
+# add_compile_options(-fsanitize=address)
+# add_link_options(-fsanitize=address)
 
 set (CMAKE_EXPORT_COMPILE_COMMANDS ON)
 set (CMAKE_CXX_STANDARD 17)
@@ -15,7 +15,7 @@ IF(Boost_FOUND)
     include_directories(${Boost_INCLUDE_DIRS})
 ENDIF(Boost_FOUND)
 
-add_compile_options(-O3 -Wall -Wextra -pedantic -Wno-unused-parameter -faligned-new -Werror -Wfatal-errors)
+add_compile_options(-O0 -g -Wall -Wextra -pedantic -Wno-unused-parameter -faligned-new -Werror -Wfatal-errors)
 add_definitions(-D_FILE_OFFSET_BITS=64)
 
 if (CMAKE_COMPILER_IS_GNUCXX)
