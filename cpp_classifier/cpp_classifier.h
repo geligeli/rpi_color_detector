@@ -1,22 +1,33 @@
 #pragma once
 
-#include <vector>
 #include <string>
+#include <memory>
+#include <tensorflow/lite/c/c_api.h>
+#include <tensorflow/lite/c/common.h>
+
 namespace cpp_classifier {
 
 struct Classifier {
-  float intercept;
-  int height;
-  int width;
-  int num_channels;
+  std::unique_ptr<TfLiteInterpreter, TfLiteInterpreterDelete> interpreter;
+  std::unique_ptr<TfLiteInterpreterOptions, TfLiteInterpreterDelete> options;
+  std::unique_ptr<TfLiteModel, TfLiteModelDelete> model;
 
-  struct Coef {
-    int x;
-    int y;
-    int c;
-    float coef;
-  };
-  std::vector<Coef> coefs;
+
+
+  // TfLiteInterpreterDelete(interpreter);
+  // TfLiteInterpreterOptionsDelete(options);
+  // TfLiteModelDelete(model);
+
+  // TfLiteInterpreterOptions *options = TfLiteInterpreterOptionsCreate();
+  // TfLiteInterpreterOptionsSetNumThreads(options, numThreads);
+  // TfLiteInterpreter *interpreter = TfLiteInterpreterCreate(model, options);
+
+  // TfLiteInterpreterAllocateTensors(interpreter);
+
+  // TfLiteTensor *inputTensor = TfLiteInterpreterGetInputTensor(interpreter, 0);
+
+  // std::cout << TfLiteTypeGetName(inputTensor->type) << std::endl;
+
 
   void LoadFromFile(const std::string& fn);
 

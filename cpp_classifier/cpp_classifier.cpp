@@ -2,53 +2,67 @@
 
 #include <array>
 #include <iostream>
+
+#include <tensorflow/lite/c/c_api.h>
+#include <tensorflow/lite/c/common.h>
+
 namespace cpp_classifier {
 
 void Classifier::LoadFromFile(const std::string& fn) {
-  FILE* fp = fopen(fn.c_str(), "rb");
 
-  std::array<int64_t, 4> buf;
-  fread(&buf, sizeof(buf), 1, fp);
 
-  auto [height, width, num_channels, n] = buf;
+  int numThreads = 4;
 
-  auto readInt = [&]() -> int {
-    int64_t v{};
-    fread(&v, sizeof(v), 1, fp);
-    return v;
-  };
+  TfLiteModel *model = TfLiteModelCreateFromFile(fn.c_str()); // "/nfs/general/shared/adder.tflite");
 
-  auto readFloat = [&]() -> float {
-    float v{};
-    fread(&v, sizeof(v), 1, fp);
-    return v;
-  };
+  TfLiteInterpreterOptions *options = TfLiteInterpreterOptionsCreate();
+  TfLiteInterpreterOptionsSetNumThreads(options, numThreads);
+  TfLiteInterpreter *interpreter = TfLiteInterpreterCreate(model, options);
 
-  coefs.resize(n);
-  for (int i = 0; i < n; ++i) {
-    coefs[i].x = readInt();
-    if (coefs[i].x < 0 || coefs[i].x >= height) {
-      throw std::runtime_error("x out of bounds");
-    }
-  }
-  for (int i = 0; i < n; ++i) {
-    coefs[i].y = readInt();
-    if (coefs[i].y < 0 || coefs[i].y >= width) {
-      throw std::runtime_error("y out of bounds");
-    }
-  }
-  for (int i = 0; i < n; ++i) {
-    coefs[i].c = readInt();
-    if (coefs[i].c < 0 || coefs[i].c >= num_channels) {
-      throw std::runtime_error("c out of bounds");
-    }
-  }
-  intercept = readFloat();
-  for (int i = 0; i < n; ++i) {
-    coefs[i].coef = readFloat();
+  TfLiteInterpreterAllocateTensors(interpreter);
+
+  TfLiteTensor *inputTensor = TfLiteInterpreterGetInputTensor(interpreter, 0);
+
+  std::cout << TfLiteTypeGetName(inputTensor->type) << std::endl;
+  std::cout << inputTensor->name << std::endl;
+  std::cout << inputTensor->dims->size << std::endl;
+
+  for (int i = 0; i < inputTensor->dims->size; ++i) {
+    std::cout << inputTensor->dims->data[i] << std::endl;
   }
 
-  fclose(fp);
+  const TfLiteTensor *outputTensor =
+  TfLiteInterpreterGetOutputTensor(interpreter, 0);
+
+  // std::cout << TfLiteTypeGetName(outputTensor->type) << std::endl;
+  // std::cout << outputTensor->name << std::endl;
+  // std::cout << outputTensor->dims->size << std::endl;
+
+    // TfLiteTensorCopyToBuffer(outputTensor, y, sizeof(y));
+
+
+  for (int j = 0; j < 5; ++j) {
+    const auto start = std::chrono::system_clock::now();
+    float x[] = {1.0f*j};
+    TfLiteTensorCopyFromBuffer(inputTensor, x, sizeof(x));
+    TfLiteInterpreterInvoke(interpreter);
+    // float y[1];
+    // const TfLiteTensor *outputTensor =
+    // TfLiteInterpreterGetOutputTensor(interpreter, 0);
+    // TfLiteTensorCopyToBuffer(outputTensor, y, sizeof(y));
+    
+    const auto stop =  std::chrono::system_clock::now();
+    auto numMs=std::chrono::duration_cast<std::chrono::milliseconds>(stop-start).count();
+    printf("%lldms\n",  numMs);
+  }
+  
+
+
+  TfLiteInterpreterDelete(interpreter);
+  TfLiteInterpreterOptionsDelete(options);
+  TfLiteModelDelete(model);
+
+
 }
 
 float Classifier::Classify(unsigned char const* data, int h, int w) const {
