@@ -62,6 +62,12 @@ void Classifier::LoadFromFile(const std::string& fn) {
 }
 
 float Classifier::Classify(unsigned char const* data, int h, int w) const {
+  TfLiteTensorCopyFromBuffer(inputTensor, data, h*w*3);
+  TfLiteInterpreterInvoke(interpreter.get());
+  float y[2];
+  TfLiteTensorCopyToBuffer(outputTensor, y, sizeof(y));
+  return y[0];
+
   // float r = intercept;
   // for (const auto& c : coefs) {
   //   r += data[c.x*3*w + c.y*3 + c.c]*c.coef;
