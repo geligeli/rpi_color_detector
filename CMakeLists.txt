@@ -15,7 +15,8 @@ IF(Boost_FOUND)
     include_directories(${Boost_INCLUDE_DIRS})
 ENDIF(Boost_FOUND)
 
-add_compile_options(-O0 -g -Wall -Wextra -pedantic -Wno-unused-parameter -faligned-new -Werror -Wfatal-errors)
+add_compile_options(-O0 -g -fsanitize=address -Wall -Wextra -pedantic -Wno-unused-parameter -faligned-new -Werror -Wfatal-errors)
+add_link_options(-fsanitize=address)
 add_definitions(-D_FILE_OFFSET_BITS=64)
 
 if (CMAKE_COMPILER_IS_GNUCXX)
