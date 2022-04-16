@@ -20,7 +20,7 @@ Classifier::Classifier(const std::string& fn) {
   model = TfLiteModelCreateFromFile(fn.c_str());
   options = TfLiteInterpreterOptionsCreate();
   TfLiteInterpreterOptionsSetNumThreads(options, 4);
-  interpreter = TfLiteInterpreterCreate(model, options);
+  /*interpreter = TfLiteInterpreterCreate(model, options);
   auto* inputTensor = TfLiteInterpreterGetInputTensor(interpreter, 0);
   const auto* outputTensor = TfLiteInterpreterGetOutputTensor(interpreter, 0);
 
@@ -35,10 +35,12 @@ Classifier::Classifier(const std::string& fn) {
   std::cerr << TfLiteTypeGetName(outputTensor->type) << std::endl;
   for (int i = 0; i < outputTensor->dims->size; ++i) {
     std::cerr << "dim[" << i << "]=" << outputTensor->dims->data[i] << std::endl;
-  }
+  }*/
 }
 
 float Classifier::Classify(unsigned char const* data, int h, int w) const {
+  interpreter = TfLiteInterpreterCreate(model, options);
+
   auto* inputTensor = TfLiteInterpreterGetInputTensor(interpreter, 0);
   // const auto* outputTensor = TfLiteInterpreterGetOutputTensor(interpreter, 0);
 
