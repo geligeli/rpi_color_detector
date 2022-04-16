@@ -99,4 +99,4 @@ add_executable(stepper_example stepper_example.cpp)
 target_link_libraries(stepper_example -lpthread ${pigpio_LIBRARY} -lrt)
 
 add_executable(tflite_model_test tflite_model_test.cpp)
-target_link_libraries(tflite_model_test -lpthread -ltensorflowlite_c)
+target_link_libraries(tflite_model_test cpp_classifier -lpthread -ltensorflowlite_c)

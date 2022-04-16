@@ -6,8 +6,14 @@
 #include <tensorflow/lite/c/c_api.h>
 #include <tensorflow/lite/c/common.h>
 
+#include "cpp_classifier/cpp_classifier.h"
+
 int main() {
-  int numThreads = 4;
+  cpp_classifier::Classifier c("/nfs/general/shared/adder.tflite");
+  std::vector<uint8_t> data(640*480*3);
+  std::cerr << c.Classify(data.data(), 640, 480) << std::endl;
+  
+  /*int numThreads = 4;
 
   TfLiteModel *model = TfLiteModelCreateFromFile("/nfs/general/shared/adder.tflite"); // "/nfs/general/shared/adder.tflite");
 
@@ -62,6 +68,6 @@ int main() {
   TfLiteInterpreterDelete(interpreter);
   TfLiteInterpreterOptionsDelete(options);
   TfLiteModelDelete(model);
-
+*/
   return 0;
 }
