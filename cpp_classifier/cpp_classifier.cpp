@@ -1,6 +1,6 @@
 #include "cpp_classifier/cpp_classifier.h"
 
-#include <array>
+#include <vector>
 #include <iostream>
 
 #include <tensorflow/lite/c/c_api.h>
