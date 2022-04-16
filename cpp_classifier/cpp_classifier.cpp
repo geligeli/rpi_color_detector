@@ -39,7 +39,7 @@ Classifier::Classifier(const std::string& fn) {
 }
 
 float Classifier::Classify(unsigned char const* data, int h, int w) const {
-  interpreter = TfLiteInterpreterCreate(model, options);
+  auto* interpreter = TfLiteInterpreterCreate(model, options);
 
   auto* inputTensor = TfLiteInterpreterGetInputTensor(interpreter, 0);
   // const auto* outputTensor = TfLiteInterpreterGetOutputTensor(interpreter, 0);
