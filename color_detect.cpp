@@ -46,8 +46,13 @@ struct JpegBuffer {
   std::mutex m;
 };
 
+/**
+ * 360 degrees = 1600 steps. Holes are 18 degrees apart.
+ * 2 steps = 1.8 deg.
+ */
 void Step(int v, std::chrono::microseconds stepTime = std::chrono::microseconds{
                      20000}) {
+  std::cerr << v << " " << stepTime.count() << std::endl;
   if (v < 0) {
     gpioWrite(24, 1);
   } else {
@@ -115,8 +120,14 @@ int main(int argc, char *argv[]) {
       }
       if (key == "KeyD") {
         Step(-80, 4ms);
+        Step(-10, 16ms);
+        Step(20, 16ms);
+        Step(-10, 16ms);
       } else if (key == "KeyA") {
         Step(80, 4ms);
+        Step(10, 16ms);
+        Step(-20, 16ms);
+        Step(10, 16ms);
       } else if (key == "KeyE") {
         Step(-1);
       } else if (key == "KeyQ") {
