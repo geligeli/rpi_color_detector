@@ -53,13 +53,12 @@ float Classifier::Classify(unsigned char const* data, int h, int w) const {
   // std::vector<unsigned char> foo(h*w*3);
   TfLiteTensorCopyFromBuffer(inputTensor, data, h*w*3);
 
-  std::cerr << "call interpreter" << std::endl;
+  // std::cerr << "call interpreter" << std::endl;
   TfLiteInterpreterInvoke(interpreter.get());
   float y[2];
-  std::cerr << "get result" << std::endl;
+  // std::cerr << "get result" << std::endl;
   TfLiteTensorCopyToBuffer(outputTensor, y, sizeof(y));
-
-  // std::cerr << "done result" << std::endl;
+  std::cerr << y[0] << "," << y[1] << std::endl;
   return y[0];
 
   // float r = intercept;
