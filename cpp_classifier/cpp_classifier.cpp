@@ -40,7 +40,7 @@ Classifier::Classifier(const std::string& fn) {
 
 float Classifier::Classify(unsigned char const* data, int h, int w) const {
   auto* inputTensor = TfLiteInterpreterGetInputTensor(interpreter, 0);
-  const auto* outputTensor = TfLiteInterpreterGetOutputTensor(interpreter, 0);
+  // const auto* outputTensor = TfLiteInterpreterGetOutputTensor(interpreter, 0);
 
 
   std::cerr << reinterpret_cast<uintptr_t>(inputTensor) << std::endl;
