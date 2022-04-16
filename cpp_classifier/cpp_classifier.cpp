@@ -19,7 +19,7 @@ void Classifier::LoadFromFile(const std::string& fn) {
   inputTensor = TfLiteInterpreterGetInputTensor(interpreter.get(), 0);
   outputTensor = TfLiteInterpreterGetOutputTensor(interpreter.get(), 0);
 
-  std::cout << "Input tensor type="
+  std::cout << "Input tensor type=";
   std::cout << TfLiteTypeGetName(inputTensor->type) << std::endl;
   for (int i = 0; i < inputTensor->dims->size; ++i) {
     std::cout << "dim[" << i << "]=" << inputTensor->dims->data[i] << std::endl;

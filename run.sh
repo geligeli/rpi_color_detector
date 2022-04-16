@@ -1,4 +1,5 @@
 #!/bin/bash
+set -e
 pushd build
 make color_detect
 popd
