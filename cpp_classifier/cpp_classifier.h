@@ -20,7 +20,7 @@ struct Classifier {
   TfLiteInterpreterOptions* options;
   TfLiteModel* model;
 
-  // TfLiteTensor *inputTensor{};
+  TfLiteTensor *inputTensor{};
   // const TfLiteTensor *outputTensor{};
 };
 

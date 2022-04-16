@@ -45,7 +45,7 @@ float Classifier::Classify(unsigned char const* data, int h, int w) const {
   // const auto* outputTensor = TfLiteInterpreterGetOutputTensor(interpreter, 0);
 
 
-  std::cerr << reinterpret_cast<uintptr_t>(inputTensor) << std::endl;
+  // std::cerr << reinterpret_cast<uintptr_t>(inputTensor) << std::endl;
   std::cerr << "copy data" << std::endl;
   std::cerr << "Input tensor type=";
   std::cerr << TfLiteTypeGetName(inputTensor->type) << std::endl;
