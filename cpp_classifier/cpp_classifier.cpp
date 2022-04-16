@@ -16,8 +16,8 @@ void Classifier::LoadFromFile(const std::string& fn) {
 
   // TfLiteInterpreterAllocateTensors(interpreter);
 
-  inputTensor = TfLiteInterpreterGetInputTensor(interpreter, 0);
-  outputTensor = TfLiteInterpreterGetOutputTensor(interpreter, 0);
+  inputTensor = TfLiteInterpreterGetInputTensor(interpreter.get(), 0);
+  outputTensor = TfLiteInterpreterGetOutputTensor(interpreter.get(), 0);
 
   // std::cout << TfLiteTypeGetName(inputTensor->type) << std::endl;
   // std::cout << inputTensor->name << std::endl;
