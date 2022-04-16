@@ -8,7 +8,7 @@
 
 namespace cpp_classifier {
 
-void Classifier::Classifier(const std::string& fn) {
+Classifier::Classifier(const std::string& fn) {
   model = {TfLiteModelCreateFromFile(fn.c_str()), TfLiteModelDelete}; // "/nfs/general/shared/adder.tflite");
   options = {TfLiteInterpreterOptionsCreate(), TfLiteInterpreterOptionsDelete};
   TfLiteInterpreterOptionsSetNumThreads(options.get(), 4);
