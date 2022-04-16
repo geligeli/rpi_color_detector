@@ -17,16 +17,16 @@ Classifier::Classifier(const std::string& fn) {
   auto* inputTensor = TfLiteInterpreterGetInputTensor(interpreter.get(), 0);
   const auto* outputTensor = TfLiteInterpreterGetOutputTensor(interpreter.get(), 0);
 
-  std::cout << "Input tensor type=";
-  std::cout << TfLiteTypeGetName(inputTensor->type) << std::endl;
+  std::cerr << "Input tensor type=";
+  std::cerr << TfLiteTypeGetName(inputTensor->type) << std::endl;
   for (int i = 0; i < inputTensor->dims->size; ++i) {
-    std::cout << "dim[" << i << "]=" << inputTensor->dims->data[i] << std::endl;
+    std::cerr << "dim[" << i << "]=" << inputTensor->dims->data[i] << std::endl;
   }
   std::cerr << reinterpret_cast<uintptr_t>(inputTensor) << std::endl;
-  std::cout << "Output tensor type=";
-  std::cout << TfLiteTypeGetName(outputTensor->type) << std::endl;
+  std::cerr << "Output tensor type=";
+  std::cerr << TfLiteTypeGetName(outputTensor->type) << std::endl;
   for (int i = 0; i < outputTensor->dims->size; ++i) {
-    std::cout << "dim[" << i << "]=" << outputTensor->dims->data[i] << std::endl;
+    std::cerr << "dim[" << i << "]=" << outputTensor->dims->data[i] << std::endl;
   }
 }
 
@@ -37,11 +37,12 @@ float Classifier::Classify(unsigned char const* data, int h, int w) const {
 
   std::cerr << reinterpret_cast<uintptr_t>(inputTensor) << std::endl;
   std::cerr << "copy data" << std::endl;
-  std::cout << "Input tensor type=";
-  std::cout << TfLiteTypeGetName(inputTensor->type) << std::endl;
+  std::cerr << "Input tensor type=";
+  std::cerr << TfLiteTypeGetName(inputTensor->type) << std::endl;
   for (int i = 0; i < inputTensor->dims->size; ++i) {
-    std::cout << "dim[" << i << "]=" << inputTensor->dims->data[i] << std::endl;
+    std::cerr << "dim[" << i << "]=" << inputTensor->dims->data[i] << std::endl;
   }
+  std::cerr << h << " " << w << " " << 3 << std::endl;
   TfLiteTensorCopyFromBuffer(inputTensor, data, h*w*3);
 
   std::cerr << "call interpreter" << std::endl;
