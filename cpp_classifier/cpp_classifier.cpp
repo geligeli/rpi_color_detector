@@ -21,7 +21,9 @@ Classifier::Classifier(const std::string& fn) {
   options = TfLiteInterpreterOptionsCreate();
   TfLiteInterpreterOptionsSetNumThreads(options, 2);
   interpreter = TfLiteInterpreterCreate(model, options);
+  TfLiteInterpreterAllocateTensors(interpreter);
   inputTensor = TfLiteInterpreterGetInputTensor(interpreter, 0);
+  
   /*const auto* outputTensor = TfLiteInterpreterGetOutputTensor(interpreter, 0);
 
 
