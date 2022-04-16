@@ -11,24 +11,22 @@
 #include <memory>
 #include <string>
 
-std::string cameraName(libcamera::Camera *camera)
-{
+std::string cameraName(libcamera::Camera *camera) {
   using namespace libcamera;
   const ControlList &props = camera->properties();
   std::string name;
-  switch (props.get(properties::Location))
-  {
-  case properties::CameraLocationFront:
-    name = "Internal front camera";
-    break;
-  case properties::CameraLocationBack:
-    name = "Internal back camera";
-    break;
-  case properties::CameraLocationExternal:
-    name = "External camera";
-    if (props.contains(properties::Model))
-      name += " '" + props.get(properties::Model) + "'";
-    break;
+  switch (props.get(properties::Location)) {
+    case properties::CameraLocationFront:
+      name = "Internal front camera";
+      break;
+    case properties::CameraLocationBack:
+      name = "Internal back camera";
+      break;
+    case properties::CameraLocationExternal:
+      name = "External camera";
+      if (props.contains(properties::Model))
+        name += " '" + props.get(properties::Model) + "'";
+      break;
   }
 
   name += " (" + camera->id() + ")";
@@ -36,15 +34,17 @@ std::string cameraName(libcamera::Camera *camera)
   return name;
 }
 
-CameraLoop::CameraLoop(std::function<void(uint8_t *data, const libcamera::StreamConfiguration &)> callback) : OnFrameCallback(callback), cm{std::make_unique<libcamera::CameraManager>()}
-{
+CameraLoop::CameraLoop(
+    std::function<void(uint8_t *data, const libcamera::StreamConfiguration &)>
+        callback)
+    : OnFrameCallback(callback),
+      cm{std::make_unique<libcamera::CameraManager>()} {
   using namespace libcamera;
   // std::unique_ptr<CameraManager> cm = std::make_unique<CameraManager>();
   cm->start();
   for (auto const &camera : cm->cameras())
     std::cout << " - " << cameraName(camera.get()) << std::endl;
-  if (cm->cameras().empty())
-  {
+  if (cm->cameras().empty()) {
     std::cout << "No cameras were identified on the system." << std::endl;
     cm->stop();
     std::terminate();
@@ -65,19 +65,16 @@ CameraLoop::CameraLoop(std::function<void(uint8_t *data, const libcamera::Stream
   config->validate();
   std::cout << "Validated viewfinder configuration is: "
             << streamConfig.toString() << std::endl;
-  if (camera->configure(config.get()))
-  {
+  if (camera->configure(config.get())) {
     std::cout << "CONFIGURATION FAILED!" << std::endl;
     std::terminate();
   }
   // FrameBufferAllocator *allocator = new FrameBufferAllocator(camera);
   allocator = std::make_unique<FrameBufferAllocator>(camera);
 
-  for (StreamConfiguration &cfg : *config)
-  {
+  for (StreamConfiguration &cfg : *config) {
     int ret = allocator->allocate(cfg.stream());
-    if (ret < 0)
-    {
+    if (ret < 0) {
       std::cerr << "Can't allocate buffers" << std::endl;
       std::terminate();
     }
@@ -87,16 +84,13 @@ CameraLoop::CameraLoop(std::function<void(uint8_t *data, const libcamera::Stream
               << std::endl;
 
     for (const std::unique_ptr<FrameBuffer> &buffer :
-         allocator->buffers(cfg.stream()))
-    {
+         allocator->buffers(cfg.stream())) {
       size_t buffer_size = 0;
-      for (unsigned i = 0; i < buffer->planes().size(); i++)
-      {
+      for (unsigned i = 0; i < buffer->planes().size(); i++) {
         const FrameBuffer::Plane &plane = buffer->planes()[i];
         buffer_size += plane.length;
         if (i == buffer->planes().size() - 1 ||
-            plane.fd.fd() != buffer->planes()[i + 1].fd.fd())
-        {
+            plane.fd.fd() != buffer->planes()[i + 1].fd.fd()) {
           void *memory = mmap(NULL, buffer_size, PROT_READ | PROT_WRITE,
                               MAP_SHARED, plane.fd.fd(), 0);
           mapped_buffers[buffer.get()].push_back(libcamera::Span<uint8_t>(
@@ -110,19 +104,16 @@ CameraLoop::CameraLoop(std::function<void(uint8_t *data, const libcamera::Stream
   const std::vector<std::unique_ptr<FrameBuffer>> &buffers =
       allocator->buffers(stream);
 
-  for (unsigned int i = 0; i < buffers.size(); ++i)
-  {
+  for (unsigned int i = 0; i < buffers.size(); ++i) {
     std::unique_ptr<Request> request = camera->createRequest();
-    if (!request)
-    {
+    if (!request) {
       std::cerr << "Can't create request" << std::endl;
       std::terminate();
     }
 
     const std::unique_ptr<FrameBuffer> &buffer = buffers[i];
     int ret = request->addBuffer(stream, buffer.get());
-    if (ret < 0)
-    {
+    if (ret < 0) {
       std::cerr << "Can't set buffer for request" << std::endl;
       std::terminate();
     }
@@ -132,11 +123,10 @@ CameraLoop::CameraLoop(std::function<void(uint8_t *data, const libcamera::Stream
      */
     ControlList &controls = request->controls();
     // controls.set(controls::Brightness, 0.5);
-    int64_t frame_time = 1000000 / 60; // in us
+    int64_t frame_time = 1000000 / 60;  // in us
     controls.set(controls::FrameDurationLimits, {frame_time, frame_time});
     controls.set(controls::AeEnable, false);
     controls.set(controls::AnalogueGain, 10);
-    
 
     requests.push_back(std::move(request));
   }
@@ -148,9 +138,7 @@ CameraLoop::CameraLoop(std::function<void(uint8_t *data, const libcamera::Stream
     camera->queueRequest(request.get());
 }
 
-CameraLoop::~CameraLoop()
-{
-
+CameraLoop::~CameraLoop() {
   camera->stop();
   allocator->free(stream);
   camera->release();
@@ -158,29 +146,23 @@ CameraLoop::~CameraLoop()
   cm->stop();
 }
 
-void CameraLoop::processRequest(libcamera::Request *request)
-{
-
+void CameraLoop::processRequest(libcamera::Request *request) {
   using namespace libcamera;
-  if (request->status() == Request::RequestCancelled)
-  {
+  if (request->status() == Request::RequestCancelled) {
     std::cout << "aborted" << std::endl;
     return;
   }
 
   const Request::BufferMap &buffers = request->buffers();
 
-  for (auto bufferPair : buffers)
-  {
+  for (auto bufferPair : buffers) {
     FrameBuffer *buffer = bufferPair.second;
 
     auto it = mapped_buffers.find(buffer);
-    if (it != mapped_buffers.end())
-    {
+    if (it != mapped_buffers.end()) {
       uint8_t *buf = it->second[0].data();
 
-      if (OnFrameCallback)
-      {
+      if (OnFrameCallback) {
         OnFrameCallback(buf, bufferPair.first->configuration());
       }
     };

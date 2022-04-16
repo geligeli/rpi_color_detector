@@ -34,6 +34,7 @@ find_package(PkgConfig REQUIRED)
 
 add_subdirectory(http_server)
 add_subdirectory(camera_loop)
+add_subdirectory(cpp_classifier)
 add_executable(servo_example servo_example.cpp)
 
 add_executable(http_server_main http_server_main.cpp)
@@ -77,8 +78,10 @@ include_directories(${pigpio_INCLUDE_DIR})
 
 include_directories(${CMAKE_SOURCE_DIR} ${LIBCAMERA_INCLUDE_DIRS})
 add_executable(color_detect color_detect.cpp)
-target_link_libraries(color_detect http_server camera_loop -lpthread ${LIBCAMERA_LINK_LIBRARIES} ${pigpio_LIBRARY})
+target_link_libraries(color_detect http_server camera_loop cpp_classifier -lpthread ${LIBCAMERA_LINK_LIBRARIES} ${pigpio_LIBRARY})
 
+add_executable(read_cpp_model read_cpp_model.cpp)
+target_link_libraries(read_cpp_model cpp_classifier)
 
 # Handle REQUIRED, QUIET, and version arguments 
 # and set the <packagename>_FOUND variable.
@@ -90,3 +93,6 @@ find_package_handle_standard_args(pigpio
 
 add_executable(stepper_example stepper_example.cpp)
 target_link_libraries(stepper_example -lpthread ${pigpio_LIBRARY} -lrt)
+
+add_executable(tflite_model_test tflite_model_test.cpp)
+target_link_libraries(tflite_model_test -lpthread -ltensorflowlite_c)

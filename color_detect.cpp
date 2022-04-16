@@ -14,6 +14,7 @@
 
 #include "camera_loop/camera_loop.h"
 #include "http_server/http_server.h"
+#include "cpp_classifier/cpp_classifier.h"
 
 namespace fs = std::filesystem;
 using namespace std::literals::chrono_literals;
@@ -68,6 +69,8 @@ void Step(int v, std::chrono::microseconds stepTime = std::chrono::microseconds{
 }
 
 int main(int argc, char *argv[]) {
+  cpp_classifier::Classifier classifier;
+  classifier.LoadFromFile("/nfs/general/shared/model");
   try {
     // Note this binds to port 8888!!
     if (gpioInitialise() < 0) {
@@ -102,6 +105,7 @@ int main(int argc, char *argv[]) {
 
     OnAquireImage = [&]() -> const ImagePtr {
       m.lock();
+      std::cout << classifier.Classify(img.data, img.h, img.w) << '\n';
       return img;
     };
     OnReleaseImage = [&](const ImagePtr &) { m.unlock(); };

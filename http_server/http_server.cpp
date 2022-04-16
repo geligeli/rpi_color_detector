@@ -8,7 +8,6 @@
 #include <boost/beast/core.hpp>
 #include <boost/beast/http.hpp>
 #include <boost/beast/version.hpp>
-
 #include <chrono>
 #include <cstdlib>
 #include <ctime>
@@ -180,7 +179,7 @@ class http_connection : public std::enable_shared_from_this<http_connection> {
       size_t size = t.tellg();
       std::string buffer(size, ' ');
       t.seekg(0);
-      t.read(&buffer[0], size); 
+      t.read(&buffer[0], size);
       beast::ostream(response_.body()) << buffer;
     }
   }
