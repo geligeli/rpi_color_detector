@@ -24,49 +24,23 @@ Classifier::Classifier(const std::string& fn) {
   for (int i = 0; i < inputTensor->dims->size; ++i) {
     std::cout << "dim[" << i << "]=" << inputTensor->dims->data[i] << std::endl;
   }
-
-  // const TfLiteTensor *outputTensor =
-  // TfLiteInterpreterGetOutputTensor(interpreter, 0);
-
   std::cout << "Output tensor type=";
   std::cout << TfLiteTypeGetName(outputTensor->type) << std::endl;
   for (int i = 0; i < outputTensor->dims->size; ++i) {
     std::cout << "dim[" << i << "]=" << outputTensor->dims->data[i] << std::endl;
   }
-
-    // TfLiteTensorCopyToBuffer(outputTensor, y, sizeof(y));
-
-
-  // for (int j = 0; j < 5; ++j) {
-  //   const auto start = std::chrono::system_clock::now();
-  //   float x[] = {1.0f*j};
-  //   TfLiteTensorCopyFromBuffer(inputTensor, x, sizeof(x));
-  //   TfLiteInterpreterInvoke(interpreter);
-  //   // float y[1];
-  //   // const TfLiteTensor *outputTensor =
-  //   // TfLiteInterpreterGetOutputTensor(interpreter, 0);
-  //   // TfLiteTensorCopyToBuffer(outputTensor, y, sizeof(y));
-    
-  //   const auto stop =  std::chrono::system_clock::now();
-  //   auto numMs=std::chrono::duration_cast<std::chrono::milliseconds>(stop-start).count();
-  //   printf("%lldms\n",  numMs);
-  // }
-  
-
-
-  // TfLiteInterpreterDelete(interpreter);
-  // TfLiteInterpreterOptionsDelete(options);
-  // TfLiteModelDelete(model);
-
-
 }
 
 float Classifier::Classify(unsigned char const* data, int h, int w) const {
-  
+  std::cerr << "copy data" << std::endl;
   TfLiteTensorCopyFromBuffer(inputTensor, data, h*w*3);
+  std::cerr << "call interpreter" << std::endl;
   TfLiteInterpreterInvoke(interpreter.get());
   float y[2];
+  std::cerr << "get result" << std::endl;
   TfLiteTensorCopyToBuffer(outputTensor, y, sizeof(y));
+
+  std::cerr << "done result" << std::endl;
   return y[0];
 
   // float r = intercept;
