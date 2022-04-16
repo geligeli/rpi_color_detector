@@ -12,6 +12,8 @@ struct Classifier {
   std::unique_ptr<TfLiteInterpreterOptions,  void(*)(TfLiteInterpreterOptions*)> options;
   std::unique_ptr<TfLiteModel, void(*)(TfLiteModel*)> model;
 
+  TfLiteTensor *inputTensor{};
+  TfLiteTensor *outputTensor{};
 
 
   // TfLiteInterpreterDelete(interpreter);

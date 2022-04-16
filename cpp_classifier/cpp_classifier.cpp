@@ -9,19 +9,15 @@
 namespace cpp_classifier {
 
 void Classifier::LoadFromFile(const std::string& fn) {
-
-
-  int numThreads = 4;
-
   model = {TfLiteModelCreateFromFile(fn.c_str()), TfLiteModelDelete}; // "/nfs/general/shared/adder.tflite");
-
   options = {TfLiteInterpreterOptionsCreate(), TfLiteInterpreterOptionsDelete};
-  TfLiteInterpreterOptionsSetNumThreads(options.get(), numThreads);
-  interpreter = TfLiteInterpreterCreate(model.get(), options), TfLiteInterpreterDelete}
+  TfLiteInterpreterOptionsSetNumThreads(options.get(), 4);
+  interpreter = TfLiteInterpreterCreate(model.get(), options.get()), TfLiteInterpreterDelete}
 
   // TfLiteInterpreterAllocateTensors(interpreter);
 
-  // TfLiteTensor *inputTensor = TfLiteInterpreterGetInputTensor(interpreter, 0);
+  inputTensor = TfLiteInterpreterGetInputTensor(interpreter, 0);
+  outputTensor = TfLiteInterpreterGetOutputTensor(interpreter, 0);
 
   // std::cout << TfLiteTypeGetName(inputTensor->type) << std::endl;
   // std::cout << inputTensor->name << std::endl;
