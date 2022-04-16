@@ -5,7 +5,7 @@
 #include <tensorflow/lite/c/common.h>
 
 int main() {
-  int numThreads = 2;
+  int numThreads = 4;
 
   TfLiteModel *model = TfLiteModelCreateFromFile("/nfs/general/shared/adder.tflite"); // "/nfs/general/shared/adder.tflite");
 
