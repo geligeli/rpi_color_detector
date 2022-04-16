@@ -51,7 +51,9 @@ float Classifier::Classify(unsigned char const* data, int h, int w) const {
     std::cerr << "dim[" << i << "]=" << inputTensor->dims->data[i] << std::endl;
   }
   std::cerr << h << " " << w << " " << 3 << std::endl;
-  TfLiteTensorCopyFromBuffer(inputTensor, data, h*w*3);
+
+  std::vector<unsigned char> foo(h*w*3);
+  TfLiteTensorCopyFromBuffer(inputTensor, foo.data(), h*w*3);
 
   // std::cerr << "call interpreter" << std::endl;
   // TfLiteInterpreterInvoke(interpreter.get());
