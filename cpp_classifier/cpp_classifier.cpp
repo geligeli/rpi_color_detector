@@ -13,26 +13,26 @@ void Classifier::LoadFromFile(const std::string& fn) {
 
   int numThreads = 4;
 
-  TfLiteModel *model = TfLiteModelCreateFromFile(fn.c_str()); // "/nfs/general/shared/adder.tflite");
+  model = {TfLiteModelCreateFromFile(fn.c_str()), TfLiteModelDelete}; // "/nfs/general/shared/adder.tflite");
 
-  TfLiteInterpreterOptions *options = TfLiteInterpreterOptionsCreate();
+  options = {TfLiteInterpreterOptionsCreate(), TfLiteInterpreterOptionsDelete};
   TfLiteInterpreterOptionsSetNumThreads(options, numThreads);
-  TfLiteInterpreter *interpreter = TfLiteInterpreterCreate(model, options);
+  interpreter = {T}fLiteInterpreterCreate(model, options), TfLiteInterpreterDelete}
 
-  TfLiteInterpreterAllocateTensors(interpreter);
+  // TfLiteInterpreterAllocateTensors(interpreter);
 
-  TfLiteTensor *inputTensor = TfLiteInterpreterGetInputTensor(interpreter, 0);
+  // TfLiteTensor *inputTensor = TfLiteInterpreterGetInputTensor(interpreter, 0);
 
-  std::cout << TfLiteTypeGetName(inputTensor->type) << std::endl;
-  std::cout << inputTensor->name << std::endl;
-  std::cout << inputTensor->dims->size << std::endl;
+  // std::cout << TfLiteTypeGetName(inputTensor->type) << std::endl;
+  // std::cout << inputTensor->name << std::endl;
+  // std::cout << inputTensor->dims->size << std::endl;
 
-  for (int i = 0; i < inputTensor->dims->size; ++i) {
-    std::cout << inputTensor->dims->data[i] << std::endl;
-  }
+  // for (int i = 0; i < inputTensor->dims->size; ++i) {
+  //   std::cout << inputTensor->dims->data[i] << std::endl;
+  // }
 
-  const TfLiteTensor *outputTensor =
-  TfLiteInterpreterGetOutputTensor(interpreter, 0);
+  // const TfLiteTensor *outputTensor =
+  // TfLiteInterpreterGetOutputTensor(interpreter, 0);
 
   // std::cout << TfLiteTypeGetName(outputTensor->type) << std::endl;
   // std::cout << outputTensor->name << std::endl;
@@ -41,36 +41,36 @@ void Classifier::LoadFromFile(const std::string& fn) {
     // TfLiteTensorCopyToBuffer(outputTensor, y, sizeof(y));
 
 
-  for (int j = 0; j < 5; ++j) {
-    const auto start = std::chrono::system_clock::now();
-    float x[] = {1.0f*j};
-    TfLiteTensorCopyFromBuffer(inputTensor, x, sizeof(x));
-    TfLiteInterpreterInvoke(interpreter);
-    // float y[1];
-    // const TfLiteTensor *outputTensor =
-    // TfLiteInterpreterGetOutputTensor(interpreter, 0);
-    // TfLiteTensorCopyToBuffer(outputTensor, y, sizeof(y));
+  // for (int j = 0; j < 5; ++j) {
+  //   const auto start = std::chrono::system_clock::now();
+  //   float x[] = {1.0f*j};
+  //   TfLiteTensorCopyFromBuffer(inputTensor, x, sizeof(x));
+  //   TfLiteInterpreterInvoke(interpreter);
+  //   // float y[1];
+  //   // const TfLiteTensor *outputTensor =
+  //   // TfLiteInterpreterGetOutputTensor(interpreter, 0);
+  //   // TfLiteTensorCopyToBuffer(outputTensor, y, sizeof(y));
     
-    const auto stop =  std::chrono::system_clock::now();
-    auto numMs=std::chrono::duration_cast<std::chrono::milliseconds>(stop-start).count();
-    printf("%lldms\n",  numMs);
-  }
+  //   const auto stop =  std::chrono::system_clock::now();
+  //   auto numMs=std::chrono::duration_cast<std::chrono::milliseconds>(stop-start).count();
+  //   printf("%lldms\n",  numMs);
+  // }
   
 
 
-  TfLiteInterpreterDelete(interpreter);
-  TfLiteInterpreterOptionsDelete(options);
-  TfLiteModelDelete(model);
+  // TfLiteInterpreterDelete(interpreter);
+  // TfLiteInterpreterOptionsDelete(options);
+  // TfLiteModelDelete(model);
 
 
 }
 
 float Classifier::Classify(unsigned char const* data, int h, int w) const {
-  float r = intercept;
-  for (const auto& c : coefs) {
-    r += data[c.x*3*w + c.y*3 + c.c]*c.coef;
-  }
-  return r;
+  // float r = intercept;
+  // for (const auto& c : coefs) {
+  //   r += data[c.x*3*w + c.y*3 + c.c]*c.coef;
+  // }
+  // return r;
 }
 
 }  // namespace cpp_classifier
