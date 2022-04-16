@@ -1,12 +1,13 @@
 
 #include <iostream>
+#include <chrono>
 #include <tensorflow/lite/c/c_api.h>
 #include <tensorflow/lite/c/common.h>
 
 int main() {
-  int numThreads = 4;
+  int numThreads = 2;
 
-  TfLiteModel *model = TfLiteModelCreateFromFile("/nfs/general/shared/adder.tflite");
+  TfLiteModel *model = TfLiteModelCreateFromFile("/nfs/general/shared/model.tflite"); // "/nfs/general/shared/adder.tflite");
 
   TfLiteInterpreterOptions *options = TfLiteInterpreterOptionsCreate();
   TfLiteInterpreterOptionsSetNumThreads(options, numThreads);
@@ -19,18 +20,28 @@ int main() {
   std::cout << TfLiteTypeGetName(inputTensor->type) << std::endl;
   std::cout << inputTensor->name << std::endl;
   std::cout << inputTensor->dims->size << std::endl;
-  float x[] = {15.0f};
-  TfLiteTensorCopyFromBuffer(inputTensor, x, sizeof(x));
 
-  TfLiteInterpreterInvoke(interpreter);
+  for (int i = 0; i < inputTensor->dims->size; ++i) {
+    std::cout << inputTensor->dims->data[i] << std::endl;
+  }
+  
 
-  float y[1];
+  for (int j = 0; j < 1000; ++j) {
+    const auto start = std::chrono::system_clock::now();
+    float x[] = {1.0f*j};
+    TfLiteTensorCopyFromBuffer(inputTensor, x, sizeof(x));
+    TfLiteInterpreterInvoke(interpreter);
+    // float y[1];
+    // const TfLiteTensor *outputTensor =
+    //     TfLiteInterpreterGetOutputTensor(interpreter, 0);
+    // TfLiteTensorCopyToBuffer(outputTensor, y, sizeof(y));
+    
+    const auto stop =  std::chrono::system_clock::now();
+    auto numMs=std::chrono::duration_cast<std::chrono::milliseconds>(stop-start).count();
+    printf("%lldms\n",  numMs);
+  }
+  
 
-  const TfLiteTensor *outputTensor =
-      TfLiteInterpreterGetOutputTensor(interpreter, 0);
-  TfLiteTensorCopyToBuffer(outputTensor, y, sizeof(y));
-
-  printf("%.4f\n", y[0]);
 
   TfLiteInterpreterDelete(interpreter);
   TfLiteInterpreterOptionsDelete(options);
