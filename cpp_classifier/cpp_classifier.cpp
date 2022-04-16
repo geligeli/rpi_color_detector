@@ -17,7 +17,7 @@ void Classifier::LoadFromFile(const std::string& fn) {
 
   options = {TfLiteInterpreterOptionsCreate(), TfLiteInterpreterOptionsDelete};
   TfLiteInterpreterOptionsSetNumThreads(options.get(), numThreads);
-  interpreter = {T}fLiteInterpreterCreate(model, options), TfLiteInterpreterDelete}
+  interpreter = TfLiteInterpreterCreate(model, options), TfLiteInterpreterDelete}
 
   // TfLiteInterpreterAllocateTensors(interpreter);
 
