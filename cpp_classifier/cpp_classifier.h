@@ -8,6 +8,7 @@
 namespace cpp_classifier {
 
 struct Classifier {
+  Classifier() = delete;
   Classifier(const std::string& fn);
   float Classify(unsigned char const * data,int h,int w) const;
   ~Classifier();
