@@ -7,7 +7,7 @@
 int main() {
   int numThreads = 2;
 
-  TfLiteModel *model = TfLiteModelCreateFromFile("/nfs/general/shared/model.tflite"); // "/nfs/general/shared/adder.tflite");
+  TfLiteModel *model = TfLiteModelCreateFromFile("/nfs/general/shared/adder.tflite"); // "/nfs/general/shared/adder.tflite");
 
   TfLiteInterpreterOptions *options = TfLiteInterpreterOptionsCreate();
   TfLiteInterpreterOptionsSetNumThreads(options, numThreads);
@@ -24,16 +24,25 @@ int main() {
   for (int i = 0; i < inputTensor->dims->size; ++i) {
     std::cout << inputTensor->dims->data[i] << std::endl;
   }
-  
 
-  for (int j = 0; j < 1000; ++j) {
+  const TfLiteTensor *outputTensor =
+  TfLiteInterpreterGetOutputTensor(interpreter, 0);
+
+  std::cout << TfLiteTypeGetName(outputTensor->type) << std::endl;
+  std::cout << outputTensor->name << std::endl;
+  std::cout << outputTensor->dims->size << std::endl;
+
+    // TfLiteTensorCopyToBuffer(outputTensor, y, sizeof(y));
+
+
+  for (int j = 0; j < 5; ++j) {
     const auto start = std::chrono::system_clock::now();
     float x[] = {1.0f*j};
     TfLiteTensorCopyFromBuffer(inputTensor, x, sizeof(x));
     TfLiteInterpreterInvoke(interpreter);
     // float y[1];
     // const TfLiteTensor *outputTensor =
-    //     TfLiteInterpreterGetOutputTensor(interpreter, 0);
+    // TfLiteInterpreterGetOutputTensor(interpreter, 0);
     // TfLiteTensorCopyToBuffer(outputTensor, y, sizeof(y));
     
     const auto stop =  std::chrono::system_clock::now();
