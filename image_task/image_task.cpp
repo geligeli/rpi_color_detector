@@ -74,12 +74,9 @@ void ImageTask::dumpJpegFile(const std::string& fn) {
   }
   FILE* fp = std::fopen(fn.c_str(), "w");
   if (!fp) {
-    return false;
+    return;
   }
-  if (std::fwrite(&img[0], img.size(), 1, fp) != 1) {
-    std::fclose(fp);
-    return false;
-  }
+  std::fwrite(&img[0], img.size(), 1, fp);
   std::fclose(fp);
 }
 
