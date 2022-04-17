@@ -90,7 +90,7 @@ void StepperThread::KeyE() { nextOp = stepper_thread::OPERATIONS::KEY_E; }
 void StepperThread::ToggleSpill() {
   int expected = stepper_thread::OPERATIONS::SPILL;
   if (!std::atomic_compare_exchange_strong(
-          nextOp, &expected, static_cast<int>(stepper_thread::OPERATIONS::STOP_SPILL))) {
+          &nextOp, &expected, stepper_thread::OPERATIONS::STOP_SPILL)) {
     nextOp = stepper_thread::OPERATIONS::SPILL;
   }
 }
