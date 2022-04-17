@@ -43,9 +43,9 @@ StepperThread::StepperThread() {
     while (DoOperation()) {
     }
   });
-};
+}
 
-StepperThread::~StepperThread() { t.join(); };
+StepperThread::~StepperThread() { t.join(); }
 
 bool StepperThread::DoOperation() {
   switch (op) {
@@ -89,6 +89,6 @@ void StepperThread::ToggleSpill() {
   if (!std::atomic_compare_exchange_strong(nextOp, &expected, STOP_SPILL)) {
     nextOp = SPILL;
   }
-};
+}
 
 }  // namespace stepper_thread
