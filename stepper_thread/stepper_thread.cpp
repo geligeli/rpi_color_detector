@@ -78,6 +78,7 @@ bool StepperThread::DoOperation() {
       nextOp = stepper_thread::OPERATIONS::NOP;
       break;
     default:
+      return false;
   }
   return true;
 }
