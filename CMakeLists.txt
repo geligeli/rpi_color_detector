@@ -35,6 +35,7 @@ message(STATUS "Platform: ${ENABLE_COMPILE_FLAGS_FOR_TARGET}")
 
 find_package(PkgConfig REQUIRED)
 
+add_subdirectory(image_task)
 add_subdirectory(http_server)
 add_subdirectory(camera_loop)
 add_subdirectory(cpp_classifier)
@@ -82,7 +83,7 @@ include_directories(${pigpio_INCLUDE_DIR})
 
 include_directories(${CMAKE_SOURCE_DIR} ${LIBCAMERA_INCLUDE_DIRS})
 add_executable(color_detect color_detect.cpp)
-target_link_libraries(color_detect http_server camera_loop stepper_thread cpp_classifier -lpthread ${LIBCAMERA_LINK_LIBRARIES} ${pigpio_LIBRARY})
+target_link_libraries(color_detect http_server camera_loop stepper_thread cpp_classifier image_task -lpthread ${LIBCAMERA_LINK_LIBRARIES} ${pigpio_LIBRARY})
 
 
 # Handle REQUIRED, QUIET, and version arguments 

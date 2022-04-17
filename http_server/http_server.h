@@ -6,6 +6,8 @@
 
 void run_server(std::filesystem::path root, unsigned short port = 8888);
 
+#include "image_task/image_task.h"
+
 struct ImagePtr {
   unsigned char *data;
   int h;
@@ -16,7 +18,7 @@ struct ImagePtr {
 extern std::function<const ImagePtr()> OnAquireImage;
 extern std::function<void(const ImagePtr &)> OnReleaseImage;
 
-// 
+//
 extern std::function<void(const std::string &)> OnImageCompressed;
 
 // User presses a key on UI callback.

@@ -48,7 +48,7 @@ int main(int argc, char *argv[]) {
   cpp_classifier::Classifier classifier("/nfs/general/shared/adder.tflite");
   try {
     std::mutex m;
-    ImagePtr img{nullptr, 0, 0};
+    ImagePtr img{nullptr, 0, 0, -1.0};
 
     JpegBuffer buf;
 
@@ -88,6 +88,8 @@ int main(int argc, char *argv[]) {
         stepper_thread.Spill();
       } else if (key == "KeyG") {
         stepper_thread.Stop();
+      } else if (key == "KeyC") {
+        stepper_thread.AutoSort();
       }
     };
 
