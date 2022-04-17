@@ -1,5 +1,6 @@
 #pragma once
 
+#include <atomic>
 #include <functional>
 #include <mutex>
 #include <optional>
@@ -19,18 +20,16 @@ class ImageTask {
   void dumpJpegFile(const std::string& fn);
 
   class RAIIIgnoreReenabled {
-      public:
-      
-      RAIIIgnoreReenabled(RAIIIgnoreReenabled&&) = default;
-      RAIIIgnoreReenabled(const RAIIIgnoreReenabled&) = delete;
-      RAIIIgnoreReenabled& operator=(RAIIIgnoreReenabled&&) = default;
-      RAIIIgnoreReenabled& operator=(const RAIIIgnoreReenabled&) = delete;
-      ~RAIIIgnoreReenabled() {
-          p->m_accept_capture_requests = true;
-      }
-      private:
-      RAIIIgnoreReenabled(ImageTask* ptr);
-      ImageTask* p;
+   public:
+    RAIIIgnoreReenabled(RAIIIgnoreReenabled&&) = default;
+    RAIIIgnoreReenabled(const RAIIIgnoreReenabled&) = delete;
+    RAIIIgnoreReenabled& operator=(RAIIIgnoreReenabled&&) = default;
+    RAIIIgnoreReenabled& operator=(const RAIIIgnoreReenabled&) = delete;
+    ~RAIIIgnoreReenabled() { p->m_accept_capture_requests = true; }
+
+   private:
+    RAIIIgnoreReenabled(ImageTask* ptr);
+    ImageTask* p;
   };
   RAIIIgnoreReenabled ignoreCapureRequest();
 
