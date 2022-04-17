@@ -19,20 +19,20 @@ class ImageTask {
   float getClassification();
   void dumpJpegFile(const std::string& fn);
 
-  class RAIIIgnoreReenabled {
+  class RAIIRenableWrapper {
    public:
-    RAIIIgnoreReenabled(RAIIIgnoreReenabled&&) = default;
-    RAIIIgnoreReenabled(const RAIIIgnoreReenabled&) = delete;
-    RAIIIgnoreReenabled& operator=(RAIIIgnoreReenabled&&) = default;
-    RAIIIgnoreReenabled& operator=(const RAIIIgnoreReenabled&) = delete;
-    ~RAIIIgnoreReenabled();
+    RAIIRenableWrapper(RAIIRenableWrapper&&) = default;
+    RAIIRenableWrapper(const RAIIRenableWrapper&) = delete;
+    RAIIRenableWrapper& operator=(RAIIRenableWrapper&&) = default;
+    RAIIRenableWrapper& operator=(const RAIIRenableWrapper&) = delete;
+    ~RAIIRenableWrapper();
 
    private:
-    RAIIIgnoreReenabled(ImageTask* image_task_ptr);
+    RAIIRenableWrapper(ImageTask* image_task_ptr);
     ImageTask* m_image_task_ptr;
     friend class ImageTask;
   };
-  RAIIIgnoreReenabled ignoreCapureRequest();
+  RAIIRenableWrapper suspendCapture();
 
  private:
   std::atomic<bool> m_accept_capture_requests{true};
