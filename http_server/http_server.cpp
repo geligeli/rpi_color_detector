@@ -8,12 +8,9 @@
 #include <boost/beast/http.hpp>
 #include <boost/beast/version.hpp>
 #include <chrono>
-#include <cstdlib>
-#include <ctime>
 #include <fstream>
-#include <iostream>
 #include <memory>
-#include <string>
+
 
 namespace beast = boost::beast;    // from <boost/beast.hpp>
 namespace http = beast::http;      // from <boost/beast/http.hpp>

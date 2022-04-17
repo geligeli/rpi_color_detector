@@ -7,13 +7,28 @@
 namespace image_task {
 
 void ImageTask::CaptureImage(uint8_t const* data, int h, int w) {
-  std::lock_guard<std::mutex> l(m_mutex);
+  if (!m_accept_capture_requests || !m_mutex.try_lock()) {
+    return;
+  }
   m_data.resize(h * w * 3);
   m_height = h;
   m_width = w;
   m_jpeg_representation = {};
   m_classification = {};
   std::memcpy(m_data.data(), data, h * w * 3);
+  m_mutex.unlock();
+}
+
+CaptureImage::RAIIIgnoreReenabled::~RAIIIgnoreReenabled() {
+  p->m_accept_capture_requests = true;
+}
+
+CaptureImage::RAIIIgnoreReenabled::RAIIIgnoreReenabled(ImageTask* image_task)
+    : p{&image_task} {}
+
+CaptureImage::RAIIIgnoreReenabled CaptureImage::ignoreCapureRequest() {
+    m_accept_capture_requests = false;
+    return RAIIIgnoreReenabled{this};
 }
 
 std::string ImageTask::getJpeg() {
