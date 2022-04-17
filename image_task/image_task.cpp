@@ -20,7 +20,7 @@ void ImageTask::CaptureImage(uint8_t const* data, int h, int w) {
 }
 
 ImageTask::RAIIIgnoreReenabled::~RAIIIgnoreReenabled() {
-  image_task_ptr->m_accept_capture_requests = true;
+  m_image_task_ptr->m_accept_capture_requests = true;
 }
 
 ImageTask::RAIIIgnoreReenabled::RAIIIgnoreReenabled(ImageTask* image_task_ptr)
