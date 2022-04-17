@@ -48,7 +48,7 @@ StepperThread::StepperThread() {
 StepperThread::~StepperThread() { t.join(); }
 
 bool StepperThread::DoOperation() {
-  switch (op) {
+  switch (nextOp.load()) {
     case NOP:
       break;
     case KEY_A:
