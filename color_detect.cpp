@@ -44,7 +44,7 @@
 
 int main(int argc, char *argv[]) {
   cpp_classifier::Classifier classifier("/nfs/general/shared/adder.tflite");
-  ImageTask imgTask([&](unsigned char const *data, int h, int w) -> float {
+  image_task::ImageTask imgTask([&](unsigned char const *data, int h, int w) -> float {
     return classifier.Classify(data, h, w);
   });
   OnProvideImageJpeg = [&]() -> std::string { return imgTask.getJpeg(); };
