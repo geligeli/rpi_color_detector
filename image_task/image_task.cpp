@@ -69,7 +69,7 @@ std::string ImageTask::getJpeg() {
 float ImageTask::getClassification() {
   std::lock_guard<std::mutex> l(m_mutex);
   if (!m_classification) {
-    m_classification = m_classifierFun(data.data(), m_height, m_width);
+    m_classification = m_classifierFun(m_data.data(), m_height, m_width);
   }
   return *m_classification;
 }
