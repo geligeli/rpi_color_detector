@@ -22,7 +22,7 @@ void ImageTask::CaptureImage(uint8_t const* data, int h, int w) {
 
 void ImageTask::WaitForNewCapture() {
   std::unique_lock<std::mutex> lk(m_mutex);
-  m_cv.wait(m_mutex, []() { return true; });
+  m_cv.wait(lk, [] { return true; });
 }
 
 ImageTask::RAIIRenableWrapper::~RAIIRenableWrapper() {
