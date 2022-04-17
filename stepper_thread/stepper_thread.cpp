@@ -15,7 +15,8 @@ enum OPERATIONS : int {
   KEY_D = 2,
   KEY_Q = 3,
   KEY_E = 4,
-  SPILL = 5
+  SPILL = 5,
+  AUTOSORT = 6,
 };
 
 namespace {
@@ -39,7 +40,8 @@ void Step(int v, std::chrono::microseconds stepTime) {
 }
 }  // namespace
 
-StepperThread::StepperThread() {
+StepperThread::StepperThread(std::function<float> getCurrentClassification)
+    : curClass{getCurrentClassification} {
   // Note this binds to port 8888!!
   if (gpioInitialise() < 0) {
     // pigpio initialisation failed.
@@ -95,6 +97,19 @@ bool StepperThread::DoOperation() {
     case stepper_thread::OPERATIONS::SPILL:
       Step(-1, 20ms);
       break;
+    case stepper_thread::OPERATIONS::AUTOSORT:
+      if (curClass() > 0.5) {
+        Step(80, 4ms);
+        Step(10, 16ms);
+        Step(-20, 16ms);
+        Step(10, 16ms);
+      } else {
+        Step(-80, 4ms);
+        Step(-10, 16ms);
+        Step(20, 16ms);
+        Step(-10, 16ms);          
+      }
+      break;
     default:
       return false;
   }
@@ -107,5 +122,7 @@ void StepperThread::KeyQ() { nextOp = stepper_thread::OPERATIONS::KEY_Q; }
 void StepperThread::KeyE() { nextOp = stepper_thread::OPERATIONS::KEY_E; }
 void StepperThread::Spill() { nextOp = stepper_thread::OPERATIONS::SPILL; }
 void StepperThread::Stop() { nextOp = stepper_thread::OPERATIONS::NOP; }
+void StepperThread::AutoSort() { nextOp = stepper_thread::OPERATIONS::AUTOSORT; }
+
 
 }  // namespace stepper_thread

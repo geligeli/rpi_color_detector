@@ -28,15 +28,9 @@ std::function<void(std::string key)> OnKeyPress;
 
 namespace my_program_state {
 
-struct Result {
-  unsigned char *buf{};
-  unsigned long size{};
-};
-
 // ..Here allocate the buffer and initialize the size
 // before using in jpeg_mem_dest.  Or it will allocate for you
 // and you have to clean up.
-
 std::string imgdata() {
   ImagePtr image = OnAquireImage();
   std::string buffer;
@@ -52,7 +46,11 @@ std::string imgdata() {
   cinfo.err = jpeg_std_error(&jerr);
   jpeg_create_compress(&cinfo);
 
-  Result result;
+  struct Result {
+    unsigned char *buf{};
+    unsigned long size{};
+  } result;
+
   jpeg_mem_dest(&cinfo, &result.buf, &result.size);
 
   // cinfo.image_width = 500;        // |-- Image width and height in pixels.

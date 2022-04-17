@@ -46,7 +46,6 @@ struct JpegBuffer {
 
 int main(int argc, char *argv[]) {
   cpp_classifier::Classifier classifier("/nfs/general/shared/adder.tflite");
-  stepper_thread::StepperThread stepper_thread;
   try {
     std::mutex m;
     ImagePtr img{nullptr, 0, 0};
@@ -55,9 +54,14 @@ int main(int argc, char *argv[]) {
 
     OnAquireImage = [&]() -> const ImagePtr {
       m.lock();
-      std::cout << classifier.Classify(img.data, img.h, img.w) << '\n';
       return img;
     };
+
+    stepper_thread::StepperThread stepper_thread([&]() {
+      std::lock_guard<std::mutex> l(m);
+      return img.classification;
+    });
+
     OnReleaseImage = [&](const ImagePtr &) { m.unlock(); };
 
     OnImageCompressed = [&](const std::string &s) { buf.store(s); };
@@ -95,6 +99,7 @@ int main(int argc, char *argv[]) {
           img.data = data;
           img.h = config.size.height;
           img.w = config.size.width;
+          img.classification = classifier.Classify(img.data, img.h, img.w);
           m.unlock();
         });
     if (argc > 2) {

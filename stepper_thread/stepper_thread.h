@@ -2,12 +2,13 @@
 
 #include <thread>
 #include <atomic>
+#include <functional>
 
 
 namespace stepper_thread {
 class StepperThread {
  public:
-  StepperThread();
+  StepperThread(std::function<float> getCurrentClassification);
   ~StepperThread();
   void KeyA();
   void KeyD();
@@ -15,11 +16,11 @@ class StepperThread {
   void KeyE();
   void Spill();
   void Stop();
+  void AutoSort();
  private:
   bool DoOperation();
   std::atomic<int> nextOp;
   std::atomic<bool> finished;
   std::thread t;
-
 };
 }  // namespace stepper_thread
