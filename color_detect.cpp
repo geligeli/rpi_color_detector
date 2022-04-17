@@ -50,10 +50,8 @@ struct JpegBuffer {
 
 int main(int argc, char *argv[]) {
   cpp_classifier::Classifier classifier("/nfs/general/shared/adder.tflite");
-
+  stepper_thread::StepperThread stepper;
   try {
-    stepper_thread::StepperThread stepper;
-
     std::mutex m;
     ImagePtr img{nullptr, 0, 0};
 
