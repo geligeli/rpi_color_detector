@@ -43,8 +43,8 @@ std::string ImageTask::getJpeg() {
 
   jpeg_mem_dest(&cinfo, &result.buf, &result.size);
 
-  cinfo.image_width = m_height;
-  cinfo.image_height = m_width;
+  cinfo.image_width = m_width;
+  cinfo.image_height = m_height;
   cinfo.input_components = 3;      // Number of color components per pixel.
   cinfo.in_color_space = JCS_RGB;  // Colorspace of input image as RGB.
 
