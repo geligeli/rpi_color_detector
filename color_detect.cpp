@@ -13,8 +13,8 @@
 #include <thread>
 
 #include "camera_loop/camera_loop.h"
-#include "http_server/http_server.h"
 #include "cpp_classifier/cpp_classifier.h"
+#include "http_server/http_server.h"
 
 namespace fs = std::filesystem;
 using namespace std::literals::chrono_literals;
@@ -87,11 +87,6 @@ int main(int argc, char *argv[]) {
     auto spill = [&spillThreadRunning]() {
       while (spillThreadRunning.load()) {
         Step(-1, 20ms);
-        // std::this_thread::sleep_for(400ms);
-        // Step(89, 2ms);
-        // std::this_thread::sleep_for(400ms);
-        // Step(200, 2ms);
-        // Step(-200, 2ms);
       }
     };
 

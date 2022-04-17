@@ -83,8 +83,6 @@ include_directories(${CMAKE_SOURCE_DIR} ${LIBCAMERA_INCLUDE_DIRS})
 add_executable(color_detect color_detect.cpp)
 target_link_libraries(color_detect http_server camera_loop cpp_classifier -lpthread ${LIBCAMERA_LINK_LIBRARIES} ${pigpio_LIBRARY})
 
-add_executable(read_cpp_model read_cpp_model.cpp)
-target_link_libraries(read_cpp_model cpp_classifier)
 
 # Handle REQUIRED, QUIET, and version arguments 
 # and set the <packagename>_FOUND variable.
