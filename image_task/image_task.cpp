@@ -1,5 +1,6 @@
 #include "image_task/image_task.h"
 
+#include <cstring>
 #include <jpeglib.h>
 
 namespace image_task {
