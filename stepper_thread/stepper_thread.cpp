@@ -7,7 +7,7 @@
 
 namespace stepper_thread {
 
-enum class OPERATIONS : int32_t {
+enum OPERATIONS : int {
   NOP = 0,
   KEY_A = 1,
   KEY_D = 2,
@@ -86,7 +86,8 @@ void StepperThread::KeyQ() { nextOp = stepper_thread::OPERATIONS::KEY_Q; }
 void StepperThread::KeyE() { nextOp = stepper_thread::OPERATIONS::KEY_E; }
 void StepperThread::ToggleSpill() {
   int expected = stepper_thread::OPERATIONS::SPILL;
-  if (!std::atomic_compare_exchange_strong(nextOp, &expected, stepper_thread::OPERATIONS::STOP_SPILL)) {
+  if (!std::atomic_compare_exchange_strong(
+          nextOp, &expected, stepper_thread::OPERATIONS::STOP_SPILL)) {
     nextOp = stepper_thread::OPERATIONS::SPILL;
   }
 }
