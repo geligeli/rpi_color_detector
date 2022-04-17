@@ -21,67 +21,8 @@ namespace http = beast::http;      // from <boost/beast/http.hpp>
 namespace net = boost::asio;       // from <boost/asio.hpp>
 using tcp = boost::asio::ip::tcp;  // from <boost/asio/ip/tcp.hpp>
 
-std::function<const ImagePtr()> OnAquireImage;
-std::function<void(const ImagePtr &)> OnReleaseImage;
-std::function<void(const std::string &)> OnImageCompressed;
+std::function<std::string()> OnProvideImageJpeg;
 std::function<void(std::string key)> OnKeyPress;
-
-namespace my_program_state {
-
-// ..Here allocate the buffer and initialize the size
-// before using in jpeg_mem_dest.  Or it will allocate for you
-// and you have to clean up.
-std::string imgdata() {
-  ImagePtr image = OnAquireImage();
-  std::string buffer;
-  if (image.data == nullptr) {
-    if (OnReleaseImage) OnReleaseImage(image);
-    return buffer;
-  }
-  int quality = 50;
-  struct jpeg_compress_struct cinfo;  // Basic info for JPEG properties.
-  struct jpeg_error_mgr jerr;         // In case of error.
-  JSAMPROW row_pointer[1];            // Pointer to JSAMPLE row[s].
-  int row_stride;                     // Physical row width in image buffer.
-  cinfo.err = jpeg_std_error(&jerr);
-  jpeg_create_compress(&cinfo);
-
-  struct Result {
-    unsigned char *buf{};
-    unsigned long size{};
-  } result;
-
-  jpeg_mem_dest(&cinfo, &result.buf, &result.size);
-
-  // cinfo.image_width = 500;        // |-- Image width and height in pixels.
-  // cinfo.image_height = 500;       // |
-  cinfo.image_width = image.w;
-  cinfo.image_height = image.h;
-  cinfo.input_components = 3;      // Number of color components per pixel.
-  cinfo.in_color_space = JCS_RGB;  // Colorspace of input image as RGB.
-
-  jpeg_set_defaults(&cinfo);
-  jpeg_set_quality(&cinfo, quality, TRUE);
-
-  unsigned char *image_buffer = image.data;
-  jpeg_start_compress(&cinfo, TRUE);
-  row_stride = cinfo.image_width * 3;  // JSAMPLEs per row in image_buffer
-
-  while (cinfo.next_scanline < cinfo.image_height) {
-    row_pointer[0] = &image_buffer[cinfo.next_scanline * row_stride];
-    (void)jpeg_write_scanlines(&cinfo, row_pointer, 1);
-  }
-  jpeg_finish_compress(&cinfo);
-  jpeg_destroy_compress(&cinfo);
-  // unlock compress.
-  if (OnReleaseImage) OnReleaseImage(image);
-  buffer.resize(result.size);
-  std::copy(result.buf, result.buf + result.size, buffer.begin());
-  free(result.buf);
-  return buffer;
-}
-
-}  // namespace my_program_state
 
 class http_connection : public std::enable_shared_from_this<http_connection> {
  public:
@@ -164,12 +105,13 @@ class http_connection : public std::enable_shared_from_this<http_connection> {
         }
       )""";
     } else if (request_.target().starts_with("/img")) {
-      response_.set(http::field::content_type, "image/jpeg");
-      std::string s = my_program_state::imgdata();
-      if (OnImageCompressed) {
-        OnImageCompressed(s);
+      if (OnProvideImageJpeg) {
+        response_.set(http::field::content_type, "image/jpeg");
+        beast::ostream(response_.body()) << OnProvideImageJpeg();
+      } else {
+        response_.set(http::field::content_type, "text/html");
+        beast::ostream(response_.body()) << "OnProvideImageJpeg is not set!";
       }
-      beast::ostream(response_.body()) << s;
     } else {
       response_.set(http::field::content_type, "text/html");
       std::ifstream t(root_ / "index.html");

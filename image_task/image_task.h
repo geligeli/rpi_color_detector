@@ -7,7 +7,6 @@
 namespace image_task {
 
 class ImageTask {
-  namespace cpp_classifier {
   ImageTask(
       std::function<float(uint8_t const* img_data, int h, int w)> classifierFun)
       : m_classifierFun(classifierFun) {}
@@ -23,6 +22,6 @@ class ImageTask {
   int m_width{};
   std::optional<std::string> m_jpeg_representation{};
   std::optional<float> m_classification{};
-  };
+};
 
 }  // namespace image_task

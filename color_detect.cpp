@@ -46,63 +46,50 @@ struct JpegBuffer {
 
 int main(int argc, char *argv[]) {
   cpp_classifier::Classifier classifier("/nfs/general/shared/adder.tflite");
+  ImageTask imgTask([&](unsigned char const *data, int h, int w) -> float {
+    return classifier.Classify(data, h, w);
+  });
+  OnProvideImageJpeg = [&]() -> std::string { return imgTask.getJpeg(); };
+  stepper_thread::StepperThread stepper_thread(
+      [&]() { return imgTask.getClassification(); });
+  OnKeyPress = [&](const std::string &key) {
+    if (key == "KeyD" || key == "KeyA") {
+      const auto outDir = std::filesystem::path("/nfs/general/shared") / key;
+      std::filesystem::create_directories(outDir);
+      const auto msSinceEpoch =
+          std::chrono::duration_cast<std::chrono::milliseconds>(
+              std::chrono::system_clock::now().time_since_epoch())
+              .count();
+      buf.save((outDir / (std::to_string(msSinceEpoch) + ".jpg")));
+    }
+    if (key == "KeyD") {
+      stepper_thread.KeyD();
+    } else if (key == "KeyA") {
+      stepper_thread.KeyA();
+    } else if (key == "KeyE") {
+      stepper_thread.KeyE();
+    } else if (key == "KeyQ") {
+      stepper_thread.KeyQ();
+    } else if (key == "KeyF") {
+      stepper_thread.Spill();
+    } else if (key == "KeyG") {
+      stepper_thread.Stop();
+    } else if (key == "KeyC") {
+      stepper_thread.AutoSort();
+    }
+  };
   try {
-    std::mutex m;
-    ImagePtr img{nullptr, 0, 0, -1.0};
-
-    JpegBuffer buf;
-
-    OnAquireImage = [&]() -> const ImagePtr {
-      m.lock();
-      return img;
-    };
-
-    stepper_thread::StepperThread stepper_thread([&]() {
-      std::lock_guard<std::mutex> l(m);
-      return img.classification;
-    });
-
-    OnReleaseImage = [&](const ImagePtr &) { m.unlock(); };
-
-    OnImageCompressed = [&](const std::string &s) { buf.store(s); };
-
-    OnKeyPress = [&](const std::string &key) {
-      if (key == "KeyD" || key == "KeyA") {
-        const auto outDir = std::filesystem::path("/nfs/general/shared") / key;
-        std::filesystem::create_directories(outDir);
-        const auto msSinceEpoch =
-            std::chrono::duration_cast<std::chrono::milliseconds>(
-                std::chrono::system_clock::now().time_since_epoch())
-                .count();
-        buf.save((outDir / (std::to_string(msSinceEpoch) + ".jpg")));
-      }
-      if (key == "KeyD") {
-        stepper_thread.KeyD();
-      } else if (key == "KeyA") {
-        stepper_thread.KeyA();
-      } else if (key == "KeyE") {
-        stepper_thread.KeyE();
-      } else if (key == "KeyQ") {
-        stepper_thread.KeyQ();
-      } else if (key == "KeyF") {
-        stepper_thread.Spill();
-      } else if (key == "KeyG") {
-        stepper_thread.Stop();
-      } else if (key == "KeyC") {
-        stepper_thread.AutoSort();
-      }
-    };
-
     CameraLoop loop(
         [&](uint8_t *data, const libcamera::StreamConfiguration &config) {
-          if (!m.try_lock()) {
-            return;
-          }
-          img.data = data;
-          img.h = config.size.height;
-          img.w = config.size.width;
-          img.classification = classifier.Classify(img.data, img.h, img.w);
-          m.unlock();
+          imgTask.CaptureImage(data, config.size.height, config.size.width);
+          // if (!m.try_lock()) {
+          //   return;
+          // }
+          // img.data = data;
+          // img.h = config.size.height;
+          // img.w = config.size.width;
+          // img.classification = classifier.Classify(img.data, img.h, img.w);
+          // m.unlock();
         });
     if (argc > 2) {
       run_server(argv[1], std::atoi(argv[2]));
