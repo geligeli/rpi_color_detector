@@ -98,7 +98,7 @@ bool StepperThread::DoOperation() {
       Step(-1, 20ms);
       break;
     case stepper_thread::OPERATIONS::AUTOSORT:
-      if (curClass() > 0.5) {
+      if (m_image_task.getClassification() > 0.5) {
         Step(80, 4ms);
         Step(10, 16ms);
         Step(-20, 16ms);
