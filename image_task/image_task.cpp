@@ -19,14 +19,14 @@ void ImageTask::CaptureImage(uint8_t const* data, int h, int w) {
   m_mutex.unlock();
 }
 
-CaptureImage::RAIIIgnoreReenabled::~RAIIIgnoreReenabled() {
+ImageTask::RAIIIgnoreReenabled::~RAIIIgnoreReenabled() {
   p->m_accept_capture_requests = true;
 }
 
-CaptureImage::RAIIIgnoreReenabled::RAIIIgnoreReenabled(ImageTask* image_task)
+ImageTask::RAIIIgnoreReenabled::RAIIIgnoreReenabled(ImageTask* image_task)
     : p{&image_task} {}
 
-CaptureImage::RAIIIgnoreReenabled CaptureImage::ignoreCapureRequest() {
+ImageTask::RAIIIgnoreReenabled ImageTask::ignoreCapureRequest() {
     m_accept_capture_requests = false;
     return RAIIIgnoreReenabled{this};
 }
