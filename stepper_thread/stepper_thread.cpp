@@ -49,45 +49,45 @@ StepperThread::~StepperThread() { t.join(); }
 
 bool StepperThread::DoOperation() {
   switch (nextOp.load()) {
-    case NOP:
+    case stepper_thread::OPERATIONS::NOP:
       break;
-    case KEY_A:
+    case stepper_thread::OPERATIONS::KEY_A:
       Step(80, 4ms);
       Step(10, 16ms);
       Step(-20, 16ms);
       Step(10, 16ms);
       break;
-    case KEY_D:
+    case stepper_thread::OPERATIONS::KEY_D:
       Step(-80, 4ms);
       Step(-10, 16ms);
       Step(20, 16ms);
       Step(-10, 16ms);
       break;
-    case KEY_Q:
+    case stepper_thread::OPERATIONS::KEY_Q:
       Step(1);
       break;
-    case KEY_E:
+    case stepper_thread::OPERATIONS::KEY_E:
       Step(-1);
       break;
-    case SPILL:
+    case stepper_thread::OPERATIONS::SPILL:
       Step(-1, 20ms);
       break;
-    case STOP_SPILL:
-      nextOp = NOP;
+    case stepper_thread::OPERATIONS::STOP_SPILL:
+      nextOp = stepper_thread::OPERATIONS::NOP;
       break;
     default:
   }
   return true;
 }
 
-void StepperThread::KeyA() { nextOp = KEY_A; }
-void StepperThread::KeyD() { nextOp = KEY_D; }
-void StepperThread::KeyQ() { nextOp = KEY_Q; }
-void StepperThread::KeyE() { nextOp = KEY_E; }
+void StepperThread::KeyA() { nextOp = stepper_thread::OPERATIONS::KEY_A; }
+void StepperThread::KeyD() { nextOp = stepper_thread::OPERATIONS::KEY_D; }
+void StepperThread::KeyQ() { nextOp = stepper_thread::OPERATIONS::KEY_Q; }
+void StepperThread::KeyE() { nextOp = stepper_thread::OPERATIONS::KEY_E; }
 void StepperThread::ToggleSpill() {
-  int expected = SPILL;
-  if (!std::atomic_compare_exchange_strong(nextOp, &expected, STOP_SPILL)) {
-    nextOp = SPILL;
+  int expected = stepper_thread::OPERATIONS::SPILL;
+  if (!std::atomic_compare_exchange_strong(nextOp, &expected, stepper_thread::OPERATIONS::STOP_SPILL)) {
+    nextOp = stepper_thread::OPERATIONS::SPILL;
   }
 }
 
