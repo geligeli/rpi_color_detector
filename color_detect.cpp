@@ -1,48 +1,46 @@
 #include <libcamera/libcamera.h>
-#include <pigpio.h>
 
-#include <atomic>
 #include <cstdio>
 #include <cstdlib>
 #include <exception>
 #include <filesystem>
 #include <fstream>
 #include <iostream>
-#include <mutex>
-#include <thread>
+// #include <mutex>
+// #include <thread>
 
 #include "camera_loop/camera_loop.h"
 #include "cpp_classifier/cpp_classifier.h"
 #include "http_server/http_server.h"
 #include "stepper_thread/stepper_thread.h"
 
-struct JpegBuffer {
- public:
-  void store(const std::string &s) {
-    std::lock_guard<std::mutex> lk(m);
-    img = s;
-  }
-  bool save(const std::string &fn) {
-    std::lock_guard<std::mutex> lk(m);
-    if (img.empty()) {
-      return false;
-    }
-    FILE *fp = std::fopen(fn.c_str(), "w");
-    if (!fp) {
-      return false;
-    }
-    if (std::fwrite(&img[0], img.size(), 1, fp) != 1) {
-      std::fclose(fp);
-      return false;
-    }
-    std::fclose(fp);
-    return true;
-  }
+// struct JpegBuffer {
+//  public:
+//   void store(const std::string &s) {
+//     std::lock_guard<std::mutex> lk(m);
+//     img = s;
+//   }
+//   bool save(const std::string &fn) {
+//     std::lock_guard<std::mutex> lk(m);
+//     if (img.empty()) {
+//       return false;
+//     }
+//     FILE *fp = std::fopen(fn.c_str(), "w");
+//     if (!fp) {
+//       return false;
+//     }
+//     if (std::fwrite(&img[0], img.size(), 1, fp) != 1) {
+//       std::fclose(fp);
+//       return false;
+//     }
+//     std::fclose(fp);
+//     return true;
+//   }
 
- private:
-  std::string img;
-  std::mutex m;
-};
+//  private:
+//   std::string img;
+//   std::mutex m;
+// };
 
 int main(int argc, char *argv[]) {
   cpp_classifier::Classifier classifier("/nfs/general/shared/adder.tflite");

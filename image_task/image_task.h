@@ -1,8 +1,10 @@
 #pragma once
 
+#include <functional>
 #include <mutex>
 #include <optional>
 #include <string>
+#include <vector>
 
 namespace image_task {
 
