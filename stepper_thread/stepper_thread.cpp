@@ -7,9 +7,14 @@
 
 namespace stepper_thread {
 
-enum class OPERATIONS : int32_t{
-    NOP = 0,   KEY_A = 1, KEY_D = 2,      KEY_Q = 3,
-    KEY_E = 4, SPILL = 5, STOP_SPILL = 6,
+enum class OPERATIONS : int32_t {
+  NOP = 0,
+  KEY_A = 1,
+  KEY_D = 2,
+  KEY_Q = 3,
+  KEY_E = 4,
+  SPILL = 5,
+  STOP_SPILL = 6,
 };
 
 namespace {
@@ -33,10 +38,12 @@ void Step(int v, std::chrono::microseconds stepTime) {
 }
 }  // namespace
 
-StepperThread::StepperThread(){t = std::thread([this]() {
-                                 while (DoOperation()) {
-                                 }
-                               })};
+StepperThread::StepperThread() {
+  t = std::thread([this]() {
+    while (DoOperation()) {
+    }
+  });
+};
 
 StepperThread::~StepperThread() { t.join(); };
 
@@ -78,10 +85,10 @@ void StepperThread::KeyD() { nextOp = KEY_D; }
 void StepperThread::KeyQ() { nextOp = KEY_Q; }
 void StepperThread::KeyE() { nextOp = KEY_E; }
 void StepperThread::ToggleSpill() {
-    int expected = SPILL;
-    if (!std::atomic_compare_exchange_strong(nextOp, &expected, STOP_SPILL)) {
-        nextOp = SPILL;
-    }
+  int expected = SPILL;
+  if (!std::atomic_compare_exchange_strong(nextOp, &expected, STOP_SPILL)) {
+    nextOp = SPILL;
+  }
 };
 
 }  // namespace stepper_thread
