@@ -17,6 +17,12 @@ void ImageTask::CaptureImage(uint8_t const* data, int h, int w) {
   m_classification = {};
   std::memcpy(m_data.data(), data, h * w * 3);
   m_mutex.unlock();
+  m_cv.notify_all();
+}
+
+void ImageTask::WaitForNewCapture() {
+  std::unique_lock<std::mutex> lk(m_mutex);
+  m_cv.wait(m_mutex, []() { return true; });
 }
 
 ImageTask::RAIIRenableWrapper::~RAIIRenableWrapper() {
@@ -27,8 +33,8 @@ ImageTask::RAIIRenableWrapper::RAIIRenableWrapper(ImageTask* image_task_ptr)
     : m_image_task_ptr{image_task_ptr} {}
 
 ImageTask::RAIIRenableWrapper ImageTask::suspendCapture() {
-    m_accept_capture_requests = false;
-    return RAIIRenableWrapper(this);
+  m_accept_capture_requests = false;
+  return RAIIRenableWrapper(this);
 }
 
 std::string ImageTask::getJpeg() {

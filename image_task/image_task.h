@@ -18,6 +18,7 @@ class ImageTask {
   std::string getJpeg();
   float getClassification();
   void dumpJpegFile(const std::string& fn);
+  void WaitForNewCapture();
 
   class RAIIRenableWrapper {
    public:
@@ -37,6 +38,7 @@ class ImageTask {
  private:
   std::atomic<bool> m_accept_capture_requests{true};
   std::mutex m_mutex{};
+  std::condition_variable m_cv{};
   std::function<float(uint8_t const* img_data, int h, int w)> m_classifierFun{};
   std::vector<uint8_t> m_data{};
   int m_height{};

@@ -103,14 +103,18 @@ bool StepperThread::DoOperation() {
           std::chrono::duration_cast<std::chrono::milliseconds>(
               std::chrono::system_clock::now().time_since_epoch())
               .count();
-      auto autoReEnable = m_image_task.get().suspendCapture();
-      const bool classification = m_image_task.get().getClassification() > 0.5;
-      const auto outDir =
-          classification ? std::filesystem::path("/nfs/general/shared/KeyA")
-                         : std::filesystem::path("/nfs/general/shared/KeyD");
-      std::filesystem::create_directories(outDir);
-      m_image_task.get().dumpJpegFile(
-          (outDir / (std::to_string(msSinceEpoch) + "_.jpg")));
+      {
+        m_image_task.get().WaitForNewCapture();
+        auto autoReEnable = m_image_task.get().suspendCapture();
+        const bool classification =
+            m_image_task.get().getClassification() > 0.5;
+        const auto outDir =
+            classification ? std::filesystem::path("/nfs/general/shared/KeyA")
+                           : std::filesystem::path("/nfs/general/shared/KeyD");
+        std::filesystem::create_directories(outDir);
+        m_image_task.get().dumpJpegFile(
+            (outDir / (std::to_string(msSinceEpoch) + "_.jpg")));
+      }
       if (classification) {
         Step(80, 4ms);
         Step(10, 16ms);
