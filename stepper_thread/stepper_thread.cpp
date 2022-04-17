@@ -7,7 +7,7 @@
 
 namespace stepper_thread {
 
-enum class OPERATIONS : int32_t = {
+enum class OPERATIONS : int32_t{
     NOP = 0,   KEY_A = 1, KEY_D = 2,      KEY_Q = 3,
     KEY_E = 4, SPILL = 5, STOP_SPILL = 6,
 };
