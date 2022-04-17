@@ -9,6 +9,7 @@
 namespace image_task {
 
 class ImageTask {
+ public:
   ImageTask(
       std::function<float(uint8_t const* img_data, int h, int w)> classifierFun)
       : m_classifierFun(classifierFun) {}
