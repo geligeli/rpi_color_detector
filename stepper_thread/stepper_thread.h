@@ -1,8 +1,10 @@
 #pragma once
 
-#include <thread>
 #include <atomic>
+#include <condition_variable>
 #include <functional>
+#include <thread>
+
 #include "image_task/image_task.h"
 
 namespace stepper_thread {
@@ -17,6 +19,7 @@ class StepperThread {
   void Spill();
   void Stop();
   void AutoSort();
+
  private:
   bool DoOperation();
   std::reference_wrapper<image_task::ImageTask> m_image_task;
