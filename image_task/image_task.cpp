@@ -20,11 +20,11 @@ void ImageTask::CaptureImage(uint8_t const* data, int h, int w) {
 }
 
 ImageTask::RAIIIgnoreReenabled::~RAIIIgnoreReenabled() {
-  p->m_accept_capture_requests = true;
+  image_task_ptr->m_accept_capture_requests = true;
 }
 
-ImageTask::RAIIIgnoreReenabled::RAIIIgnoreReenabled(ImageTask* image_task)
-    : p{image_task} {}
+ImageTask::RAIIIgnoreReenabled::RAIIIgnoreReenabled(ImageTask* image_task_ptr)
+    : m_image_task_ptr{image_task} {}
 
 ImageTask::RAIIIgnoreReenabled ImageTask::ignoreCapureRequest() {
     m_accept_capture_requests = false;

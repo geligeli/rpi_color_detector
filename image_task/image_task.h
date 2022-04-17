@@ -28,8 +28,9 @@ class ImageTask {
     ~RAIIIgnoreReenabled();
 
    private:
-    RAIIIgnoreReenabled(ImageTask* ptr);
-    ImageTask* p;
+    RAIIIgnoreReenabled(ImageTask* image_task_ptr);
+    ImageTask* m_image_task_ptr;
+    friend class ImageTask;
   };
   RAIIIgnoreReenabled ignoreCapureRequest();
 
