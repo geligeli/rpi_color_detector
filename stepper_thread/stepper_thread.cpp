@@ -5,6 +5,8 @@
 #include <chrono>
 #include <iostream>
 
+using namespace std::literals::chrono_literals;
+
 namespace stepper_thread {
 
 enum OPERATIONS : int {
