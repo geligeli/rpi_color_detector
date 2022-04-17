@@ -2,7 +2,6 @@
 #include <pigpio.h>
 
 #include <atomic>
-#include <chrono>
 #include <cstdio>
 #include <cstdlib>
 #include <exception>
@@ -16,9 +15,6 @@
 #include "cpp_classifier/cpp_classifier.h"
 #include "http_server/http_server.h"
 #include "stepper_thread/stepper_thread.h"
-
-namespace fs = std::filesystem;
-using namespace std::literals::chrono_literals;
 
 struct JpegBuffer {
  public:
@@ -50,7 +46,7 @@ struct JpegBuffer {
 
 int main(int argc, char *argv[]) {
   cpp_classifier::Classifier classifier("/nfs/general/shared/adder.tflite");
-  stepper_thread::StepperThread stepper;
+  stepper_thread::StepperThread stepper_thread;
   try {
     std::mutex m;
     ImagePtr img{nullptr, 0, 0};
@@ -66,7 +62,7 @@ int main(int argc, char *argv[]) {
 
     OnImageCompressed = [&](const std::string &s) { buf.store(s); };
 
-    OnKeyPress = [&](const std::string &key) mutable {
+    OnKeyPress = [&](const std::string &key) {
       if (key == "KeyD" || key == "KeyA") {
         const auto outDir = std::filesystem::path("/nfs/general/shared") / key;
         std::filesystem::create_directories(outDir);
