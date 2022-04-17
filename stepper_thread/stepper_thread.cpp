@@ -51,7 +51,7 @@ StepperThread::StepperThread() {
   gpioWrite(23, 0);
   gpioWrite(24, 0);
 
-  nexstOp = stepper_thread::OPERATIONS::NOP;
+  nextOp = stepper_thread::OPERATIONS::NOP;
   finished = false;
 
   t = std::thread([this]() {
