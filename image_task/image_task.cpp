@@ -28,7 +28,7 @@ ImageTask::RAIIIgnoreReenabled::RAIIIgnoreReenabled(ImageTask* image_task)
 
 ImageTask::RAIIIgnoreReenabled ImageTask::ignoreCapureRequest() {
     m_accept_capture_requests = false;
-    return RAIIIgnoreReenabled{this};
+    return RAIIIgnoreReenabled(this);
 }
 
 std::string ImageTask::getJpeg() {
