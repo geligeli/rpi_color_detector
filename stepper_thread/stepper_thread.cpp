@@ -98,7 +98,7 @@ bool StepperThread::DoOperation() {
     case stepper_thread::OPERATIONS::SPILL:
       Step(-1, 20ms);
       break;
-    case stepper_thread::OPERATIONS::AUTOSORT:
+    case stepper_thread::OPERATIONS::AUTOSORT: {
       const auto msSinceEpoch =
           std::chrono::duration_cast<std::chrono::milliseconds>(
               std::chrono::system_clock::now().time_since_epoch())
@@ -123,6 +123,7 @@ bool StepperThread::DoOperation() {
         Step(-10, 16ms);
       }
       break;
+    }
     default:
       return false;
   }
