@@ -40,7 +40,7 @@ void Step(int v, std::chrono::microseconds stepTime) {
 }
 }  // namespace
 
-StepperThread::StepperThread(std::function<float> getCurrentClassification)
+StepperThread::StepperThread(std::function<float()> getCurrentClassification)
     : curClass{getCurrentClassification} {
   // Note this binds to port 8888!!
   if (gpioInitialise() < 0) {

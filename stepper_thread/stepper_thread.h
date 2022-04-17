@@ -8,7 +8,7 @@
 namespace stepper_thread {
 class StepperThread {
  public:
-  StepperThread(std::function<float> getCurrentClassification);
+  StepperThread(std::function<float()> getCurrentClassification);
   ~StepperThread();
   void KeyA();
   void KeyD();
@@ -22,5 +22,6 @@ class StepperThread {
   std::atomic<int> nextOp;
   std::atomic<bool> finished;
   std::thread t;
+  std::function<float()> curClass;
 };
 }  // namespace stepper_thread
