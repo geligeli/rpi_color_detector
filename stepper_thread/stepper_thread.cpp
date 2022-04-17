@@ -103,11 +103,12 @@ bool StepperThread::DoOperation() {
           std::chrono::duration_cast<std::chrono::milliseconds>(
               std::chrono::system_clock::now().time_since_epoch())
               .count();
+      bool classification = false;
       {
         m_image_task.get().WaitForNewCapture();
         auto autoReEnable = m_image_task.get().suspendCapture();
-        const bool classification =
-            m_image_task.get().getClassification() > 0.5;
+
+        classification = m_image_task.get().getClassification() > 0.5;
         const auto outDir =
             classification ? std::filesystem::path("/nfs/general/shared/KeyA")
                            : std::filesystem::path("/nfs/general/shared/KeyD");
