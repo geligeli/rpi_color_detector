@@ -15,6 +15,7 @@
 #include "camera_loop/camera_loop.h"
 #include "cpp_classifier/cpp_classifier.h"
 #include "http_server/http_server.h"
+#include "stepper_thread/stepper_thread.h"
 
 namespace fs = std::filesystem;
 using namespace std::literals::chrono_literals;
@@ -47,50 +48,11 @@ struct JpegBuffer {
   std::mutex m;
 };
 
-/**
- * 360 degrees = 1600 steps. Holes are 18 degrees apart.
- * 2 steps = 1.8 deg.
- */
-void Step(int v, std::chrono::microseconds stepTime = std::chrono::microseconds{
-                     20000}) {
-  std::cerr << v << " " << stepTime.count() << std::endl;
-  if (v < 0) {
-    gpioWrite(24, 1);
-  } else {
-    gpioWrite(24, 0);
-  }
-
-  for (int i = 0; i < std::abs(v); ++i) {
-    gpioWrite(23, 1);
-    std::this_thread::sleep_for(stepTime / 2);
-    gpioWrite(23, 0);
-    std::this_thread::sleep_for(stepTime / 2);
-  }
-}
-
 int main(int argc, char *argv[]) {
   cpp_classifier::Classifier classifier("/nfs/general/shared/adder.tflite");
+
   try {
-    // Note this binds to port 8888!!
-    if (gpioInitialise() < 0) {
-      // pigpio initialisation failed.
-      std::cerr << "pigpio initialisation failed.\n";
-      return EXIT_FAILURE;
-    }
-    gpioSetMode(23, PI_OUTPUT);  // Set GPIO17 as input.
-    gpioSetMode(24, PI_OUTPUT);  // Set GPIO18 as output.
-    gpioWrite(23, 0);
-    gpioWrite(24, 0);
-
-    std::atomic<bool> spillThreadRunning{true};
-
-    auto spill = [&spillThreadRunning]() {
-      while (spillThreadRunning.load()) {
-        Step(-1, 20ms);
-      }
-    };
-
-    std::thread spillThread;
+    stepper_thread::StepperThread stepper;
 
     std::mutex m;
     ImagePtr img{nullptr, 0, 0};
@@ -117,29 +79,17 @@ int main(int argc, char *argv[]) {
         buf.save((outDir / (std::to_string(msSinceEpoch) + ".jpg")));
       }
       if (key == "KeyD") {
-        Step(-80, 4ms);
-        Step(-10, 16ms);
-        Step(20, 16ms);
-        Step(-10, 16ms);
+        stepper_thread.KeyD();
       } else if (key == "KeyA") {
-        Step(80, 4ms);
-        Step(10, 16ms);
-        Step(-20, 16ms);
-        Step(10, 16ms);
+        stepper_thread.KeyA();
       } else if (key == "KeyE") {
-        Step(-1);
+        stepper_thread.KeyE();
       } else if (key == "KeyQ") {
-        Step(1);
+        stepper_thread.KeyQ();
       } else if (key == "KeyF") {
-        spillThreadRunning = true;
-        if (!spillThread.joinable()) {
-          spillThread = std::thread(spill);
-        }
+        stepper_thread.Spill();
       } else if (key == "KeyG") {
-        spillThreadRunning = false;
-        if (spillThread.joinable()) {
-          spillThread.join();
-        }
+        stepper_thread.Stop();
       }
     };
 

@@ -15,8 +15,7 @@ enum OPERATIONS : int {
   KEY_D = 2,
   KEY_Q = 3,
   KEY_E = 4,
-  SPILL = 5,
-  STOP_SPILL = 6,
+  SPILL = 5
 };
 
 namespace {
@@ -41,41 +40,60 @@ void Step(int v, std::chrono::microseconds stepTime) {
 }  // namespace
 
 StepperThread::StepperThread() {
+  // Note this binds to port 8888!!
+  if (gpioInitialise() < 0) {
+    // pigpio initialisation failed.
+    std::cerr << "pigpio initialisation failed.\n";
+    std::terminate();
+  }
+  gpioSetMode(23, PI_OUTPUT);  // Set GPIO17 as input.
+  gpioSetMode(24, PI_OUTPUT);  // Set GPIO18 as output.
+  gpioWrite(23, 0);
+  gpioWrite(24, 0);
+
+  nexstOp = stepper_thread::OPERATIONS::NOP;
+  finished = false;
+
   t = std::thread([this]() {
-    while (DoOperation()) {
-    }
+    while (DoOperation() && !finished)
+      ;
   });
 }
 
-StepperThread::~StepperThread() { t.join(); }
+StepperThread::~StepperThread() {
+  finished = true;
+  t.join();
+}
 
 bool StepperThread::DoOperation() {
   switch (nextOp.load()) {
     case stepper_thread::OPERATIONS::NOP:
+      std::this_thread::sleep_for(10ms);
       break;
     case stepper_thread::OPERATIONS::KEY_A:
+      nextOp = stepper_thread::OPERATIONS::NOP;
       Step(80, 4ms);
       Step(10, 16ms);
       Step(-20, 16ms);
       Step(10, 16ms);
       break;
     case stepper_thread::OPERATIONS::KEY_D:
+      nextOp = stepper_thread::OPERATIONS::NOP;
       Step(-80, 4ms);
       Step(-10, 16ms);
       Step(20, 16ms);
       Step(-10, 16ms);
       break;
     case stepper_thread::OPERATIONS::KEY_Q:
+      nextOp = stepper_thread::OPERATIONS::NOP;
       Step(1, 20ms);
       break;
     case stepper_thread::OPERATIONS::KEY_E:
+      nextOp = stepper_thread::OPERATIONS::NOP;
       Step(-1, 20ms);
       break;
     case stepper_thread::OPERATIONS::SPILL:
       Step(-1, 20ms);
-      break;
-    case stepper_thread::OPERATIONS::STOP_SPILL:
-      nextOp = stepper_thread::OPERATIONS::NOP;
       break;
     default:
       return false;
@@ -87,12 +105,7 @@ void StepperThread::KeyA() { nextOp = stepper_thread::OPERATIONS::KEY_A; }
 void StepperThread::KeyD() { nextOp = stepper_thread::OPERATIONS::KEY_D; }
 void StepperThread::KeyQ() { nextOp = stepper_thread::OPERATIONS::KEY_Q; }
 void StepperThread::KeyE() { nextOp = stepper_thread::OPERATIONS::KEY_E; }
-void StepperThread::ToggleSpill() {
-  int expected = stepper_thread::OPERATIONS::SPILL;
-  if (!std::atomic_compare_exchange_strong(
-          &nextOp, &expected, stepper_thread::OPERATIONS::STOP_SPILL)) {
-    nextOp = stepper_thread::OPERATIONS::SPILL;
-  }
-}
+void StepperThread::Spill() { nextOp = stepper_thread::OPERATIONS::SPILL; }
+void StepperThread::Stop() { nextOp = stepper_thread::OPERATIONS::NOP; }
 
 }  // namespace stepper_thread
