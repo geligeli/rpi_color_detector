@@ -12,6 +12,7 @@
 #include "camera_loop/camera_loop.h"
 #include "cpp_classifier/cpp_classifier.h"
 #include "http_server/http_server.h"
+#include "image_task/image_task.h"
 #include "stepper_thread/stepper_thread.h"
 
 // struct JpegBuffer {
@@ -44,9 +45,10 @@
 
 int main(int argc, char *argv[]) {
   cpp_classifier::Classifier classifier("/nfs/general/shared/adder.tflite");
-  image_task::ImageTask imgTask([&](unsigned char const *data, int h, int w) -> float {
-    return classifier.Classify(data, h, w);
-  });
+  image_task::ImageTask imgTask(
+      [&](unsigned char const *data, int h, int w) -> float {
+        return classifier.Classify(data, h, w);
+      });
   OnProvideImageJpeg = [&]() -> std::string { return imgTask.getJpeg(); };
   stepper_thread::StepperThread stepper_thread(
       [&]() { return imgTask.getClassification(); });
