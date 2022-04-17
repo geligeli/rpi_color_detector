@@ -5,7 +5,7 @@
 namespace image_task {
 
 void ImageTask::CaptureImage(uint8_t const* data, int h, int w) {
-  std::lock_guard<std::mutex> l(m);
+  std::lock_guard<std::mutex> l(m_mutex);
   m_data.resize(h * w * 3);
   m_height = h;
   m_width = w;
@@ -15,7 +15,7 @@ void ImageTask::CaptureImage(uint8_t const* data, int h, int w) {
 }
 
 std::string ImageTask::getJpeg() {
-  std::lock_guard<std::mutex> l(m);
+  std::lock_guard<std::mutex> l(m_mutex);
   if (m_data.empty()) {
     return "";
   }
@@ -66,7 +66,7 @@ std::string ImageTask::getJpeg() {
 }
 
 float ImageTask::getClassification() {
-  std::lock_guard<std::mutex> l(m);
+  std::lock_guard<std::mutex> l(m_mutex);
   if (!m_classification) {
     m_classification = m_classifierFun(data.data(), m_height, m_width);
   }
