@@ -66,10 +66,10 @@ bool StepperThread::DoOperation() {
       Step(-10, 16ms);
       break;
     case stepper_thread::OPERATIONS::KEY_Q:
-      Step(1);
+      Step(1, 20ms);
       break;
     case stepper_thread::OPERATIONS::KEY_E:
-      Step(-1);
+      Step(-1, 20ms);
       break;
     case stepper_thread::OPERATIONS::SPILL:
       Step(-1, 20ms);
