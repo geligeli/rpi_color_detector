@@ -1,7 +1,8 @@
 #include "image_task/image_task.h"
 
-#include <cstring>
 #include <jpeglib.h>
+
+#include <cstring>
 
 namespace image_task {
 
@@ -64,6 +65,22 @@ std::string ImageTask::getJpeg() {
   std::copy(result.buf, result.buf + result.size, buffer.begin());
   free(result.buf);
   return buffer;
+}
+
+void ImageTask::dumpJpegFile(const std::string& fn) {
+  auto img = getJpeg();
+  if (img.empty()) {
+    return;
+  }
+  FILE* fp = std::fopen(fn.c_str(), "w");
+  if (!fp) {
+    return false;
+  }
+  if (std::fwrite(&img[0], img.size(), 1, fp) != 1) {
+    std::fclose(fp);
+    return false;
+  }
+  std::fclose(fp);
 }
 
 float ImageTask::getClassification() {

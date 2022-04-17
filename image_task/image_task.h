@@ -16,6 +16,7 @@ class ImageTask {
   void CaptureImage(uint8_t const* img_data, int h, int w);
   std::string getJpeg();
   float getClassification();
+  void dumpJpegFile(const std::string &fn);
 
  private:
   std::mutex m_mutex{};
