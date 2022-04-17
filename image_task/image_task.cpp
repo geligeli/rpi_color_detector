@@ -24,7 +24,7 @@ ImageTask::RAIIIgnoreReenabled::~RAIIIgnoreReenabled() {
 }
 
 ImageTask::RAIIIgnoreReenabled::RAIIIgnoreReenabled(ImageTask* image_task)
-    : p{&image_task} {}
+    : p{image_task} {}
 
 ImageTask::RAIIIgnoreReenabled ImageTask::ignoreCapureRequest() {
     m_accept_capture_requests = false;
