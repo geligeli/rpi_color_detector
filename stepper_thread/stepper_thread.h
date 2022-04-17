@@ -13,10 +13,12 @@ class StepperThread {
   void KeyD();
   void KeyQ();
   void KeyE();
-  void ToggleSpill();
+  void Spill();
+  void Stop();
  private:
   bool DoOperation();
   std::atomic<int> nextOp;
+  std::atomic<bool> finished;
   std::thread t;
 
 };
