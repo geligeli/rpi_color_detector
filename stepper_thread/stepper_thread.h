@@ -15,6 +15,7 @@ class StepperThread {
   void KeyE();
   void ToggleSpill();
  private:
+  bool DoOperation();
   std::atomic<int> nextOp;
   std::thread t;
 

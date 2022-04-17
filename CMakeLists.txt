@@ -38,6 +38,7 @@ find_package(PkgConfig REQUIRED)
 add_subdirectory(http_server)
 add_subdirectory(camera_loop)
 add_subdirectory(cpp_classifier)
+add_subdirectory(stepper_thread)
 add_executable(servo_example servo_example.cpp)
 
 add_executable(http_server_main http_server_main.cpp)
