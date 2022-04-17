@@ -25,7 +25,7 @@ class ImageTask {
     RAIIIgnoreReenabled(const RAIIIgnoreReenabled&) = delete;
     RAIIIgnoreReenabled& operator=(RAIIIgnoreReenabled&&) = default;
     RAIIIgnoreReenabled& operator=(const RAIIIgnoreReenabled&) = delete;
-    ~RAIIIgnoreReenabled() { p->m_accept_capture_requests = true; }
+    ~RAIIIgnoreReenabled();
 
    private:
     RAIIIgnoreReenabled(ImageTask* ptr);
