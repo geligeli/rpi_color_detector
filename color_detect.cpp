@@ -20,8 +20,7 @@ int main(int argc, char *argv[]) {
         return classifier.Classify(data, h, w);
       });
   OnProvideImageJpeg = [&]() -> std::string { return imgTask.getJpeg(); };
-  stepper_thread::StepperThread stepper_thread(
-      [&]() { return imgTask.getClassification(); });
+  stepper_thread::StepperThread stepper_thread(imgTask);
   OnKeyPress = [&](const std::string &key) {
     if (key == "KeyD" || key == "KeyA") {
       const auto outDir = std::filesystem::path("/nfs/general/shared") / key;

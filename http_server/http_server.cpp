@@ -1,6 +1,5 @@
 #include "http_server/http_server.h"
 
-#include <jpeglib.h>
 #include <stdio.h>
 #include <stdlib.h>
 

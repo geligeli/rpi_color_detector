@@ -40,8 +40,8 @@ void Step(int v, std::chrono::microseconds stepTime) {
 }
 }  // namespace
 
-StepperThread::StepperThread(std::function<float()> getCurrentClassification)
-    : curClass{getCurrentClassification} {
+StepperThread::StepperThread(image_task::ImageTask& image_task)
+    : m_image_task{image_task} {
   // Note this binds to port 8888!!
   if (gpioInitialise() < 0) {
     // pigpio initialisation failed.
@@ -53,45 +53,45 @@ StepperThread::StepperThread(std::function<float()> getCurrentClassification)
   gpioWrite(23, 0);
   gpioWrite(24, 0);
 
-  nextOp = stepper_thread::OPERATIONS::NOP;
-  finished = false;
+  m_next_op = stepper_thread::OPERATIONS::NOP;
+  m_finished = false;
 
-  t = std::thread([this]() {
-    while (DoOperation() && !finished)
+  m_thread = std::thread([this]() {
+    while (DoOperation() && !m_finished)
       ;
   });
 }
 
 StepperThread::~StepperThread() {
-  finished = true;
-  t.join();
+  m_finished = true;
+  m_thread.join();
 }
 
 bool StepperThread::DoOperation() {
-  switch (nextOp.load()) {
+  switch (m_next_op.load()) {
     case stepper_thread::OPERATIONS::NOP:
       std::this_thread::sleep_for(10ms);
       break;
     case stepper_thread::OPERATIONS::KEY_A:
-      nextOp = stepper_thread::OPERATIONS::NOP;
+      m_next_op = stepper_thread::OPERATIONS::NOP;
       Step(80, 4ms);
       Step(10, 16ms);
       Step(-20, 16ms);
       Step(10, 16ms);
       break;
     case stepper_thread::OPERATIONS::KEY_D:
-      nextOp = stepper_thread::OPERATIONS::NOP;
+      m_next_op = stepper_thread::OPERATIONS::NOP;
       Step(-80, 4ms);
       Step(-10, 16ms);
       Step(20, 16ms);
       Step(-10, 16ms);
       break;
     case stepper_thread::OPERATIONS::KEY_Q:
-      nextOp = stepper_thread::OPERATIONS::NOP;
+      m_next_op = stepper_thread::OPERATIONS::NOP;
       Step(1, 20ms);
       break;
     case stepper_thread::OPERATIONS::KEY_E:
-      nextOp = stepper_thread::OPERATIONS::NOP;
+      m_next_op = stepper_thread::OPERATIONS::NOP;
       Step(-1, 20ms);
       break;
     case stepper_thread::OPERATIONS::SPILL:
@@ -107,7 +107,7 @@ bool StepperThread::DoOperation() {
         Step(-80, 4ms);
         Step(-10, 16ms);
         Step(20, 16ms);
-        Step(-10, 16ms);          
+        Step(-10, 16ms);
       }
       break;
     default:
@@ -116,13 +116,14 @@ bool StepperThread::DoOperation() {
   return true;
 }
 
-void StepperThread::KeyA() { nextOp = stepper_thread::OPERATIONS::KEY_A; }
-void StepperThread::KeyD() { nextOp = stepper_thread::OPERATIONS::KEY_D; }
-void StepperThread::KeyQ() { nextOp = stepper_thread::OPERATIONS::KEY_Q; }
-void StepperThread::KeyE() { nextOp = stepper_thread::OPERATIONS::KEY_E; }
-void StepperThread::Spill() { nextOp = stepper_thread::OPERATIONS::SPILL; }
-void StepperThread::Stop() { nextOp = stepper_thread::OPERATIONS::NOP; }
-void StepperThread::AutoSort() { nextOp = stepper_thread::OPERATIONS::AUTOSORT; }
-
+void StepperThread::KeyA() { m_next_op = stepper_thread::OPERATIONS::KEY_A; }
+void StepperThread::KeyD() { m_next_op = stepper_thread::OPERATIONS::KEY_D; }
+void StepperThread::KeyQ() { m_next_op = stepper_thread::OPERATIONS::KEY_Q; }
+void StepperThread::KeyE() { m_next_op = stepper_thread::OPERATIONS::KEY_E; }
+void StepperThread::Spill() { m_next_op = stepper_thread::OPERATIONS::SPILL; }
+void StepperThread::Stop() { m_next_op = stepper_thread::OPERATIONS::NOP; }
+void StepperThread::AutoSort() {
+  m_next_op = stepper_thread::OPERATIONS::AUTOSORT;
+}
 
 }  // namespace stepper_thread

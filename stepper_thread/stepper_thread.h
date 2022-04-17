@@ -3,12 +3,12 @@
 #include <thread>
 #include <atomic>
 #include <functional>
-
+#include "image_task/image_task.h"
 
 namespace stepper_thread {
 class StepperThread {
  public:
-  StepperThread(std::function<float()> getCurrentClassification);
+  StepperThread(image_task::ImageTask&);
   ~StepperThread();
   void KeyA();
   void KeyD();
@@ -19,9 +19,9 @@ class StepperThread {
   void AutoSort();
  private:
   bool DoOperation();
-  std::atomic<int> nextOp;
-  std::atomic<bool> finished;
-  std::thread t;
-  std::function<float()> curClass;
+  std::reference_wrapper<image_task::ImageTask> m_image_task;
+  std::atomic<int> m_next_op;
+  std::atomic<bool> m_finished;
+  std::thread m_thread;
 };
 }  // namespace stepper_thread

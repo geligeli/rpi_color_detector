@@ -32,4 +32,4 @@ find_package_handle_standard_args(pigpio
     pigpio_INCLUDE_DIR pigpio_LIBRARY pigpiod_if_LIBRARY pigpiod_if2_LIBRARY)
 
 add_library(stepper_thread stepper_thread.cpp)
-target_link_libraries(stepper_thread ${pigpio_LIBRARY} -lpthread)
+target_link_libraries(stepper_thread ${pigpio_LIBRARY} image_task -lpthread)

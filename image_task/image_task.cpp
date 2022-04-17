@@ -49,7 +49,7 @@ std::string ImageTask::getJpeg() {
   cinfo.in_color_space = JCS_RGB;  // Colorspace of input image as RGB.
 
   jpeg_set_defaults(&cinfo);
-  jpeg_set_quality(&cinfo, quality, TRUE);
+  jpeg_set_quality(&cinfo, quality, TRUE);g
 
   unsigned char* image_buffer = m_data.data();
   jpeg_start_compress(&cinfo, TRUE);
