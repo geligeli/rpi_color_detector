@@ -28,9 +28,7 @@ class StepperThread {
   std::atomic<bool> m_finished;
   std::thread m_thread;
   int m_step_position{};
-  enum DIRECTION : int {
-    LEFT=1,RIGHT=-1
-  };
+  enum DIRECTION : int { LEFT = 1, RIGHT = -1 };
   DIRECTION m_record_position_direction{LEFT};
 };
 }  // namespace stepper_thread

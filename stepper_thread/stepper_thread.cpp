@@ -18,7 +18,7 @@ enum OPERATIONS : int {
   KEY_E = 4,
   SPILL = 5,
   AUTOSORT = 6,
-  RECORD_POSITION_TRAINING_DATA =7,
+  RECORD_POSITION_TRAINING_DATA = 7,
 };
 
 int wrapAround(int v, int delta, int mod) {
@@ -53,7 +53,6 @@ StepperThread::~StepperThread() {
   m_finished = true;
   m_thread.join();
 }
-
 
 /**
  * 360 degrees = 1600 steps. Holes are 18 degrees apart.
@@ -144,14 +143,17 @@ bool StepperThread::DoOperation() {
       {
         m_image_task.get().WaitForNewCapture();
         auto autoReEnable = m_image_task.get().suspendCapture();
-        const auto outDir = std::filesystem::path("/nfs/general/shared/pos/" + std::to_string(m_step_position));
+        const auto outDir = std::filesystem::path(
+            "/nfs/general/shared/pos/" + std::to_string(m_step_position));
         std::filesystem::create_directories(outDir);
         m_image_task.get().dumpJpegFile(
             (outDir / (std::to_string(msSinceEpoch) + "_.jpg")));
       }
       Step(m_record_position_direction, 20ms);
       if (m_step_position == 0) {
-        m_record_position_direction *= -1;
+        m_record_position_direction =
+            m_record_position_direction == DIRECTION::LEFT ? DIRECTION::RIGHT
+                                                           : DIRECTION::LEFT;
       }
       break;
     }
