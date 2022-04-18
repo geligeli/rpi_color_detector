@@ -1,7 +1,6 @@
 #pragma once
 
 #include <atomic>
-#include <condition_variable>
 #include <functional>
 #include <thread>
 
@@ -19,12 +18,19 @@ class StepperThread {
   void Spill();
   void Stop();
   void AutoSort();
+  void RecordPositionTrainingData();
 
  private:
+  void Step(int v, std::chrono::microseconds stepTime);
   bool DoOperation();
   std::reference_wrapper<image_task::ImageTask> m_image_task;
   std::atomic<int> m_next_op;
   std::atomic<bool> m_finished;
   std::thread m_thread;
+  int m_step_position{};
+  enum DIRECTION : int {
+    LEFT=-1,RIGHT=1
+  };
+  DIRECTION m_record_position_direction_right{LEFT};
 };
 }  // namespace stepper_thread
