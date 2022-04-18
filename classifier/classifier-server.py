@@ -7,21 +7,39 @@ import glob
 from http import HTTPStatus
 from http.server import SimpleHTTPRequestHandler, HTTPServer
 from socketserver import ThreadingMixIn
+from collections import defaultdict
 import threading
 
 from urllib.parse import urlparse, parse_qs
 
 
 BASE_DIR = '/nfs/general/shared'
-ALLOWED_PATHS = set(['/style.css', '/js.js'])
+ALLOWED_PATHS = set(['/style.css', '/js.js', '/orientation'])
 
 A_FILES = set([x.replace(BASE_DIR, '')
                for x in glob.glob('{}/KeyA/*.jpg'.format(BASE_DIR))])
 D_FILES = set([x.replace(BASE_DIR, '')
                for x in glob.glob('{}/KeyD/*.jpg'.format(BASE_DIR))])
+DIR_FILES = set([x.replace(BASE_DIR, '')
+                 for x in glob.glob('{}/pos/*/*.jpg'.format(BASE_DIR))])
+
+
+# for f in DIR_FILES:
+#     if int(f.split('/')[3].split('_')[0]) >= 1650270649087:
+#         os.rename(BASE_DIR+f, BASE_DIR+f+'.bad')
+# DIR_FILES = set([x for x in DIR_FILES if int(x.split('/')[3].split('_')[0]) < 1650270649087])
+
+
+
+DIR_FILES_DICT=defaultdict(lambda: [])
+for x in DIR_FILES:
+    DIR_FILES_DICT[int(x.split('/')[2])%80].append(x)
+
+print(DIR_FILES_DICT)
 
 class ThreadedHTTPServer(ThreadingMixIn, HTTPServer):
     """Handle requests in a separate thread."""
+
 
 def parseImagePaths():
     global A_FILES
@@ -32,7 +50,7 @@ def parseImagePaths():
                    for x in glob.glob('{}/KeyD/*.jpg'.format(BASE_DIR))])
 
 
-class MyServer(SimpleHTTPRequestHandler):   
+class MyServer(SimpleHTTPRequestHandler):
     def send_head(self):
         print(self)
         if self.path.startswith('/labelImage?'):
@@ -41,8 +59,12 @@ class MyServer(SimpleHTTPRequestHandler):
             self.moveImage(qs["className"][0], qs["imageName"][0])
             return False
         path = self.translate_path(self.path)
+        print(path)
         if path == '/':
             self.indexHtml()
+            return False
+        elif path == '/orientation':
+            self.orientationIndexHtml()
             return False
         elif path == '/style.css':
             self.serveStyle()
@@ -55,7 +77,7 @@ class MyServer(SimpleHTTPRequestHandler):
 
     def translate_path(self, path):
         print(path)
-        if self.path in A_FILES or self.path in D_FILES:
+        if self.path in A_FILES or self.path in D_FILES or self.path in DIR_FILES:
             return BASE_DIR + self.path
         elif self.path in ALLOWED_PATHS:
             return self.path
@@ -97,6 +119,25 @@ class MyServer(SimpleHTTPRequestHandler):
         l += '</div>'
         return l
 
+    def orientationIndexHtml(self):
+        s = '''
+        <html>
+        <head>
+        <link rel="stylesheet" href="/style.css">
+        <title>Orientation index</title>
+        </head>
+        <body>
+        <div class="flexbox-container">
+        '''
+        for i in range(800):
+            s += self.imageList(str(i), sorted(DIR_FILES_DICT[i]))
+        s += '''
+        </div>
+        </body>
+        </html>
+        '''
+        self.serveString(s)
+
     def indexHtml(self):
         parseImagePaths()
         s = '''
@@ -126,7 +167,7 @@ class MyServer(SimpleHTTPRequestHandler):
             className = 'KeyA'
         toName = '{}/{}/{}'.format(BASE_DIR, className, imageName)
         shutil.move(fromName, toName)
-        
+
     def do_HEAD(self):
         """Serve a HEAD request."""
         f = self.send_head()
