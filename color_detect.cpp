@@ -45,6 +45,8 @@ int main(int argc, char *argv[]) {
       stepper_thread.Stop();
     } else if (key == "KeyC") {
       stepper_thread.AutoSort();
+    } else if (key == "KeyT") {
+      stepper_thread.RecordPositionTrainingData();
     }
   };
   try {
