@@ -29,8 +29,8 @@ class StepperThread {
   std::thread m_thread;
   int m_step_position{};
   enum DIRECTION : int {
-    LEFT=-1,RIGHT=1
+    LEFT=1,RIGHT=-1
   };
-  DIRECTION m_record_position_direction_right{LEFT};
+  DIRECTION m_record_position_direction{LEFT};
 };
 }  // namespace stepper_thread
