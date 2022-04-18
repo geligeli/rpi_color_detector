@@ -152,8 +152,8 @@ bool StepperThread::DoOperation() {
       Step(m_record_position_direction, 20ms);
       if (m_step_position == 0) {
         m_record_position_direction =
-            m_record_position_direction == DIRECTION::LEFT ? DIRECTION::RIGHT
-                                                           : DIRECTION::LEFT;
+            (m_record_position_direction == DIRECTION::LEFT) ? DIRECTION::RIGHT
+                                                             : DIRECTION::LEFT;
       }
       break;
     }
