@@ -12,7 +12,12 @@ int main(int argc, char** argv) {
   cpp_classifier::Classifier c(argv[1]);
   
   std::vector<uint8_t> data(640 * 480 * 3);
-  std::cerr << c.Classify(data.data(), 640, 480) << std::endl;
+  for (int i =0; i < 10; ++i) { 
+    const auto start = std::chrono::system_clock::now();
+    c.Classify(data.data(), 640, 480);
+    // std::cerr << c.Classify(data.data(), 640, 480) << std::endl;
+    std::cout << std::chronon::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now()-start).count() << "ms\n";
+  }
 
   return 0;
 }
