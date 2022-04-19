@@ -1,7 +1,7 @@
 #include "image_task/image_task.h"
 
 #include <jpeglib.h>
-
+#include <fstream>
 #include <cstring>
 
 namespace image_task {
@@ -143,7 +143,9 @@ void ImageTask::dumpJpegFile(const std::string& fn) {
   if (img.empty()) {
     return;
   }
-  getClassification()
+  
+  std::ofstream(fn + ".classification") << getClassification();
+  
   FILE* fp = std::fopen(fn.c_str(), "w");
   if (!fp) {
     return;
