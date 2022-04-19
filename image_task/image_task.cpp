@@ -12,7 +12,7 @@ std::string base64_encode(const std::string& in) {
   std::string out;
 
   int val = 0, valb = -6;
-  for (uchar c : in) {
+  for (unsigned char c : in) {
     val = (val << 8) + c;
     valb += 8;
     while (valb >= 0) {
@@ -39,7 +39,7 @@ std::string base64_decode(const std::string& in) {
         i;
 
   int val = 0, valb = -8;
-  for (uchar c : in) {
+  for (unsigned char c : in) {
     if (T[c] == -1) break;
     val = (val << 6) + T[c];
     valb += 6;
