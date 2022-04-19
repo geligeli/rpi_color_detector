@@ -15,10 +15,7 @@
 
 int main(int argc, char *argv[]) {
   cpp_classifier::Classifier classifier("/nfs/general/shared/tflite/fused_model.tflite");
-  image_task::ImageTask imgTask(
-      [&](unsigned char const *data, int h, int w) -> float {
-        return classifier.Classify(data, h, w);
-      });
+  image_task::ImageTask imgTask(classifier);
   OnProvideImageJpeg = [&]() -> std::string { imgTask.getClassification(); return imgTask.getJpeg(); };
   stepper_thread::StepperThread stepper_thread(imgTask);
   OnKeyPress = [&](const std::string &key) {
