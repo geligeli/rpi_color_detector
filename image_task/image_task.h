@@ -7,7 +7,6 @@
 #include <optional>
 #include <string>
 #include <vector>
-#include <math.h>
 
 #include "cpp_classifier/cpp_classifier.h"
 
