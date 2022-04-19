@@ -114,7 +114,7 @@ bool StepperThread::DoOperation() {
         m_image_task.get().WaitForNewCapture();
         auto autoReEnable = m_image_task.get().suspendCapture();
 
-        classification = m_image_task.get().getClassification() > 0.5;
+        classification = m_image_task.get().getClassification().prob() > 0.5;
         const auto outDir =
             classification ? std::filesystem::path("/nfs/general/shared/KeyA")
                            : std::filesystem::path("/nfs/general/shared/KeyD");
