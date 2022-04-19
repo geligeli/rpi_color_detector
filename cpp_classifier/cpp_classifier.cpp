@@ -18,13 +18,13 @@ Classifier::Classifier(const std::string& fn) {
   TfLiteInterpreterAllocateTensors(interpreter.get());
   
   
-  auto numInputTensors = TfLiteInterpreterGetInputTensorCount(interpreter.get());
-  auto numOutputTensors = TfLiteInterpreterGetOutputTensorCount(interpreter.get());
-
+  const auto numInputTensors = TfLiteInterpreterGetInputTensorCount(interpreter.get());
   for (int i = 0; i < numInputTensors; ++i) {
     inputTensors.push_back(TfLiteInterpreterGetInputTensor(interpreter.get(), i));
   }
-  for (int i = 0; i < numInputTensors; ++i) {
+
+  const auto numOutputTensors = TfLiteInterpreterGetOutputTensorCount(interpreter.get());
+  for (int i = 0; i < numOutputTensors; ++i) {
     outputTensors.push_back(TfLiteInterpreterGetOutputTensor(interpreter.get(), i));
   }
 
