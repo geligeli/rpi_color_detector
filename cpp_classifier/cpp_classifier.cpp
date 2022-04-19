@@ -53,7 +53,7 @@ float Classifier::Classify(unsigned char const* data, int h, int w) const {
   float orientation[2];
   TfLiteTensorCopyToBuffer(outputTensors[0], classification, sizeof(classification));
   TfLiteTensorCopyToBuffer(outputTensors[1], orientation, sizeof(orientation));
-  std::cerr << classification[0] << " " << atan2(orientation[1],orientation[0]) * 180 /  3.14159265;
+  std::cerr << classification[0] << '\t' << atan2(orientation[1],orientation[0]) * 180 /  3.14159265 << '\n'
   return 0;  // y[0];
 }
 
