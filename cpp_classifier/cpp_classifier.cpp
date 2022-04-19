@@ -16,9 +16,18 @@ Classifier::Classifier(const std::string& fn) {
   interpreter = {TfLiteInterpreterCreate(model.get(), options.get()),
                  TfLiteInterpreterDelete};
   TfLiteInterpreterAllocateTensors(interpreter.get());
+  
+  
+  auto numInputTensors = TfLiteInterpreterGetInputTensorCount(interpreter.get());
+  auto numOutputTensors = TfLiteInterpreterGetOutputTensorCount(interpreter.get());
 
-  inputTensor = TfLiteInterpreterGetInputTensor(interpreter.get(), 0);
-  outputTensor = TfLiteInterpreterGetOutputTensor(interpreter.get(), 0);
+  for (int i = 0; i < numInputTensors; ++i) {
+    inputTensors.push_back(TfLiteInterpreterGetInputTensor(interpreter.get(), i));
+  }
+  for (int i = 0; i < numInputTensors; ++i) {
+    outputTensors.push_back(TfLiteInterpreterGetOutputTensor(interpreter.get(), i));
+  }
+
 
   // model = TfLiteModelCreateFromFile(fn.c_str());
   // options = TfLiteInterpreterOptionsCreate();
@@ -45,24 +54,29 @@ Classifier::Classifier(const std::string& fn) {
 }
 
 void Classifier::PrintDebugInfo() const {
-  std::cout << "Input tensor type=" << TfLiteTypeGetName(inputTensor->type) << '\n';
-  for (int i = 0; i < inputTensor->dims->size; ++i) {
-    std::cout << "dim[" << i << "]=" << inputTensor->dims->data[i] << '\n';
+  int index{0};
+  for (const auto* inputTensor : inputTensors) {
+    std::cout << "Input tensor ["<< index++ << "] type=" << TfLiteTypeGetName(inputTensor->type) << '\n';
+    for (int i = 0; i < inputTensor->dims->size; ++i) {
+      std::cout << "dim[" << i << "]=" << inputTensor->dims->data[i] << '\n';
+    }
   }
-  std::cout << "Output tensor type=" << TfLiteTypeGetName(outputTensor->type) << '\n';
-  for (int i = 0; i < outputTensor->dims->size; ++i) {
-    std::cout << "dim[" << i << "]=" << outputTensor->dims->data[i] << '\n';
+  for (const auto* outputTensor : outputTensors) {
+    std::cout << "Output tensor ["<< index++ << "] type=" << TfLiteTypeGetName(outputTensor->type) << '\n';
+    for (int i = 0; i < outputTensor->dims->size; ++i) {
+      std::cout << "dim[" << i << "]=" << outputTensor->dims->data[i] << '\n';
+    }
   }
 }
 
 
 float Classifier::Classify(unsigned char const* data, int h, int w) const {
-  TfLiteTensorCopyFromBuffer(inputTensor, data, h * w * 3);
+  // TfLiteTensorCopyFromBuffer(inputTensor, data, h * w * 3);
   TfLiteInterpreterInvoke(interpreter.get());
-  float y[2];
-  TfLiteTensorCopyToBuffer(outputTensor, y, sizeof(y));
+  // float y[2];
+  // TfLiteTensorCopyToBuffer(outputTensor, y, sizeof(y));
   // std::cerr << y[0] << "," << y[1] << std::endl;
-  return y[0];
+  return 0; // y[0];
 }
 
 }  // namespace cpp_classifier

@@ -5,6 +5,7 @@
 
 #include <memory>
 #include <string>
+#include <vector>
 
 namespace cpp_classifier {
 
@@ -22,8 +23,8 @@ struct Classifier {
   std::unique_ptr<TfLiteModel, void (*)(TfLiteModel *)> model{
       nullptr, TfLiteModelDelete};
 
-  TfLiteTensor *inputTensor;
-  const TfLiteTensor *outputTensor{};
+  std::vector<TfLiteTensor*> inputTensors{};
+  std::vector<TfLiteTensor const *> outputTensors{};
 };
 
 }  // namespace cpp_classifier
