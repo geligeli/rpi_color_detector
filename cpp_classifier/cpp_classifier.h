@@ -8,6 +8,7 @@
 #include <vector>
 #include <array>
 #include <math.h>
+#include <iostream>
 
 namespace cpp_classifier {
 
