@@ -19,6 +19,7 @@ class ImageTask {
   std::string getJpeg();
   float getClassification();
   void dumpJpegFile(const std::string& fn);
+  std::string AsDataUrl();
   void WaitForNewCapture();
 
   class RAIIRenableWrapper {

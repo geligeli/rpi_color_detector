@@ -1,16 +1,12 @@
 #include "cpp_classifier/cpp_classifier.h"
 
-#include <tensorflow/lite/c/c_api.h>
-#include <tensorflow/lite/c/common.h>
-
 #include <iostream>
-#include <vector>
 
 namespace cpp_classifier {
 
 Classifier::Classifier(const std::string& fn) {
   model = {TfLiteModelCreateFromFile(fn.c_str()),
-           TfLiteModelDelete};  // "/nfs/general/shared/adder.tflite");
+           TfLiteModelDelete};
   options = {TfLiteInterpreterOptionsCreate(), TfLiteInterpreterOptionsDelete};
   TfLiteInterpreterOptionsSetNumThreads(options.get(), 4);
   interpreter = {TfLiteInterpreterCreate(model.get(), options.get()),
@@ -27,30 +23,6 @@ Classifier::Classifier(const std::string& fn) {
   for (int i = 0; i < numOutputTensors; ++i) {
     outputTensors.push_back(TfLiteInterpreterGetOutputTensor(interpreter.get(), i));
   }
-
-
-  // model = TfLiteModelCreateFromFile(fn.c_str());
-  // options = TfLiteInterpreterOptionsCreate();
-  // TfLiteInterpreterOptionsSetNumThreads(options, 2);
-  // interpreter = TfLiteInterpreterCreate(model, options);
-
-  // inputTensor = TfLiteInterpreterGetInputTensor(interpreter, 0);
-
-  /*const auto* outputTensor = TfLiteInterpreterGetOutputTensor(interpreter, 0);
-
-
-  std::cerr << "Input tensor type=";
-  std::cerr << TfLiteTypeGetName(inputTensor->type) << std::endl;
-  for (int i = 0; i < inputTensor->dims->size; ++i) {
-    std::cerr << "dim[" << i << "]=" << inputTensor->dims->data[i] << std::endl;
-  }
-  std::cerr << reinterpret_cast<uintptr_t>(inputTensor) << std::endl;
-  std::cerr << "Output tensor type=";
-  std::cerr << TfLiteTypeGetName(outputTensor->type) << std::endl;
-  for (int i = 0; i < outputTensor->dims->size; ++i) {
-    std::cerr << "dim[" << i << "]=" << outputTensor->dims->data[i] <<
-  std::endl;
-  }*/
 }
 
 void Classifier::PrintDebugInfo() const {
