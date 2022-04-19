@@ -1,6 +1,5 @@
 #include "cpp_classifier/cpp_classifier.h"
 
-#include <math.h>
 #include <iostream>
 
 namespace cpp_classifier {
@@ -46,7 +45,7 @@ void Classifier::PrintDebugInfo() const {
   }
 }
 
-Classification Classifier::Classify(unsigned char const* data, int h, int w) const {
+Classifier::Classification Classifier::Classify(unsigned char const* data, int h, int w) const {
   TfLiteTensorCopyFromBuffer(inputTensors[0], data, h * w * 3);
   TfLiteInterpreterInvoke(interpreter.get());
   Classification result;
