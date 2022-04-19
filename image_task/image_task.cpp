@@ -143,6 +143,7 @@ void ImageTask::dumpJpegFile(const std::string& fn) {
   if (img.empty()) {
     return;
   }
+  getClassification()
   FILE* fp = std::fopen(fn.c_str(), "w");
   if (!fp) {
     return;
@@ -151,10 +152,10 @@ void ImageTask::dumpJpegFile(const std::string& fn) {
   std::fclose(fp);
 }
 
-float ImageTask::getClassification() {
+cpp_classifier::Classifier::Classification ImageTask::getClassification() {
   std::lock_guard<std::mutex> l(m_mutex);
   if (!m_classification) {
-    m_classification = m_classifierFun(m_data.data(), m_height, m_width);
+    m_classification = classifier.Classify(m_data.data(), m_height, m_width);
   }
   return *m_classification;
 }

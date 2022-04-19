@@ -10,4 +10,4 @@ message(STATUS "    include path: ${JPEG_LIBRARY_INCLUDE_DIRS}")
 include_directories(${CMAKE_SOURCE_DIR} ${JPEG_LIBRARY_INCLUDE_DIRS})
 
 add_library(image_task image_task.cpp)
-target_link_libraries(image_task ${JPEG_LIBRARY_LINK_LIBRARIES})
+target_link_libraries(image_task cpp_classifier ${JPEG_LIBRARY_LINK_LIBRARIES})

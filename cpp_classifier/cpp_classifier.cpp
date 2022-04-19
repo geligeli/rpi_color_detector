@@ -46,16 +46,13 @@ void Classifier::PrintDebugInfo() const {
   }
 }
 
-float Classifier::Classify(unsigned char const* data, int h, int w) const {
+Classification Classifier::Classify(unsigned char const* data, int h, int w) const {
   TfLiteTensorCopyFromBuffer(inputTensors[0], data, h * w * 3);
   TfLiteInterpreterInvoke(interpreter.get());
-  float classification[2];
-  float orientation[2];
-  TfLiteTensorCopyToBuffer(outputTensors[0], classification, sizeof(classification));
-  TfLiteTensorCopyToBuffer(outputTensors[1], orientation, sizeof(orientation));
-  double probability = 1.0 / (1.0 + exp(classification[1]-classification[0]));
-  std::cerr << classification[0] << '\t' << classification[1] << '\t' << probability << '\t' << atan2(orientation[1],orientation[0]) * 180 /  3.14159265 << '\n';
-  return classification[0];
+  Classification result;
+  TfLiteTensorCopyToBuffer(outputTensors[0], result.classification, sizeof(result.classification));
+  TfLiteTensorCopyToBuffer(outputTensors[1], result.orientation, sizeof(result.orientation));
+  return result;
 }
 
 }  // namespace cpp_classifier

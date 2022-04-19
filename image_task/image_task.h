@@ -8,16 +8,18 @@
 #include <string>
 #include <vector>
 
+#include "cpp_classifier/cpp_classifier.h"
+
+
 namespace image_task {
 
 class ImageTask {
  public:
-  ImageTask(
-      std::function<float(uint8_t const* img_data, int h, int w)> classifierFun)
+  ImageTask(const cpp_classifier::Classifier& classifier)
       : m_classifierFun(classifierFun) {}
   void CaptureImage(uint8_t const* img_data, int h, int w);
   std::string getJpeg();
-  float getClassification();
+  cpp_classifier::Classifier::Classification getClassification();
   void dumpJpegFile(const std::string& fn);
   std::string AsDataUrl();
   void WaitForNewCapture();
@@ -38,15 +40,15 @@ class ImageTask {
   RAIIRenableWrapper suspendCapture();
 
  private:
+  const Classifier& m_classifier;
   std::atomic<bool> m_accept_capture_requests{true};
   std::mutex m_mutex{};
   std::condition_variable m_cv{};
-  std::function<float(uint8_t const* img_data, int h, int w)> m_classifierFun{};
   std::vector<uint8_t> m_data{};
   int m_height{};
   int m_width{};
   std::optional<std::string> m_jpeg_representation{};
-  std::optional<float> m_classification{};
+  std::optional<cpp_classifier::Classifier::Classification> m_classification{};
 };
 
 }  // namespace image_task
