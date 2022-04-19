@@ -40,7 +40,7 @@ class ImageTask {
   RAIIRenableWrapper suspendCapture();
 
  private:
-  const Classifier& m_classifier;
+  const cpp_classifier::Classifier& m_classifier;
   std::atomic<bool> m_accept_capture_requests{true};
   std::mutex m_mutex{};
   std::condition_variable m_cv{};
