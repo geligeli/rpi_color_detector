@@ -1,5 +1,6 @@
 #include "cpp_classifier/cpp_classifier.h"
 
+#include <math.h>
 #include <iostream>
 
 namespace cpp_classifier {
@@ -46,11 +47,13 @@ void Classifier::PrintDebugInfo() const {
 }
 
 float Classifier::Classify(unsigned char const* data, int h, int w) const {
-  // TfLiteTensorCopyFromBuffer(inputTensor, data, h * w * 3);
+  TfLiteTensorCopyFromBuffer(inputTensor[0], data, h * w * 3);
   TfLiteInterpreterInvoke(interpreter.get());
-  // float y[2];
-  // TfLiteTensorCopyToBuffer(outputTensor, y, sizeof(y));
-  // std::cerr << y[0] << "," << y[1] << std::endl;
+  float classification[2];
+  float orientation[2];
+  TfLiteTensorCopyToBuffer(outputTensor[0], classification, sizeof(classification));
+  TfLiteTensorCopyToBuffer(outputTensor[1], orientation, sizeof(orientation));
+  std::cerr << classification[0] << " " << atan2(orientation[1],orientation[0]) * 180 /  3.14159265;
   return 0;  // y[0];
 }
 

@@ -14,7 +14,7 @@
 #include "stepper_thread/stepper_thread.h"
 
 int main(int argc, char *argv[]) {
-  cpp_classifier::Classifier classifier("/nfs/general/shared/adder.tflite");
+  cpp_classifier::Classifier classifier("/nfs/general/shared/tflite/fused_model.tflite");
   image_task::ImageTask imgTask(
       [&](unsigned char const *data, int h, int w) -> float {
         return classifier.Classify(data, h, w);
