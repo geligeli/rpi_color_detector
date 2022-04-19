@@ -44,6 +44,18 @@ Classifier::Classifier(const std::string& fn) {
   }*/
 }
 
+void Classifier::PrintDebugInfo() const {
+  std::cout << "Input tensor type=" << TfLiteTypeGetName(inputTensor->type) << '\n';
+  for (int i = 0; i < inputTensor->dims->size; ++i) {
+    std::cout << "dim[" << i << "]=" << inputTensor->dims->data[i] << '\n';
+  }
+  std::cout << "Output tensor type=" << TfLiteTypeGetName(outputTensor->type) << '\n';
+  for (int i = 0; i < outputTensor->dims->size; ++i) {
+    std::cout << "dim[" << i << "]=" << outputTensor->dims->data[i] << '\n';
+  }
+}
+
+
 float Classifier::Classify(unsigned char const* data, int h, int w) const {
   TfLiteTensorCopyFromBuffer(inputTensor, data, h * w * 3);
   TfLiteInterpreterInvoke(interpreter.get());

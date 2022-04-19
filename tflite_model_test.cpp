@@ -10,6 +10,8 @@ int main(int argc, char** argv) {
     return 1;
   }
   cpp_classifier::Classifier c(argv[1]);
+
+  c.PrintDebugInfo();
   
   std::vector<uint8_t> data(640 * 480 * 3);
   for (int i =0; i < 10; ++i) { 

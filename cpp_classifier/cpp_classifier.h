@@ -11,6 +11,7 @@ namespace cpp_classifier {
 struct Classifier {
   Classifier(const std::string &fn);
   float Classify(unsigned char const *data, int h, int w) const;
+  void PrintDebugInfo() const;
 
  private:
   std::unique_ptr<TfLiteInterpreter, void (*)(TfLiteInterpreter *)> interpreter{
