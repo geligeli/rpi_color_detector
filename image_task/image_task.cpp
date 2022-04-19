@@ -29,7 +29,7 @@ std::string base64_encode(const std::string& in) {
   while (out.size() % 4) out.push_back('=');
   return out;
 }
-
+/*
 std::string base64_decode(const std::string& in) {
   std::string out;
 
@@ -49,7 +49,7 @@ std::string base64_decode(const std::string& in) {
     }
   }
   return out;
-}
+}*/
 }  // namespace
 
 void ImageTask::CaptureImage(uint8_t const* data, int h, int w) {
