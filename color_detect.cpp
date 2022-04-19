@@ -19,7 +19,7 @@ int main(int argc, char *argv[]) {
       [&](unsigned char const *data, int h, int w) -> float {
         return classifier.Classify(data, h, w);
       });
-  OnProvideImageJpeg = [&]() -> std::string { return imgTask.getJpeg(); };
+  OnProvideImageJpeg = [&]() -> std::string { imgTask.getClassification; return imgTask.getJpeg(); };
   stepper_thread::StepperThread stepper_thread(imgTask);
   OnKeyPress = [&](const std::string &key) {
     if (key == "KeyD" || key == "KeyA") {
