@@ -16,7 +16,7 @@ namespace image_task {
 class ImageTask {
  public:
   ImageTask(const cpp_classifier::Classifier& classifier)
-      : m_classifierFun(classifierFun) {}
+      : m_classifier(classifierFun) {}
   void CaptureImage(uint8_t const* img_data, int h, int w);
   std::string getJpeg();
   cpp_classifier::Classifier::Classification getClassification();

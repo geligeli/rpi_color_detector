@@ -155,7 +155,7 @@ void ImageTask::dumpJpegFile(const std::string& fn) {
 cpp_classifier::Classifier::Classification ImageTask::getClassification() {
   std::lock_guard<std::mutex> l(m_mutex);
   if (!m_classification) {
-    m_classification = classifier.Classify(m_data.data(), m_height, m_width);
+    m_classification = m_classifier.Classify(m_data.data(), m_height, m_width);
   }
   return *m_classification;
 }
