@@ -1,10 +1,56 @@
 #include "image_task/image_task.h"
 
 #include <jpeglib.h>
-
+#include <fstream>
 #include <cstring>
 
 namespace image_task {
+
+namespace {
+
+std::string base64_encode(const std::string& in) {
+  std::string out;
+
+  int val = 0, valb = -6;
+  for (unsigned char c : in) {
+    val = (val << 8) + c;
+    valb += 8;
+    while (valb >= 0) {
+      out.push_back(
+          "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/"
+              [(val >> valb) & 0x3F]);
+      valb -= 6;
+    }
+  }
+  if (valb > -6)
+    out.push_back(
+        "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/"
+            [((val << 8) >> (valb + 8)) & 0x3F]);
+  while (out.size() % 4) out.push_back('=');
+  return out;
+}
+/*
+std::string base64_decode(const std::string& in) {
+  std::string out;
+
+  std::vector<int> T(256, -1);
+  for (int i = 0; i < 64; i++)
+    T["ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/"[i]] =
+        i;
+
+  int val = 0, valb = -8;
+  for (unsigned char c : in) {
+    if (T[c] == -1) break;
+    val = (val << 6) + T[c];
+    valb += 6;
+    if (valb >= 0) {
+      out.push_back(char((val >> valb) & 0xFF));
+      valb -= 8;
+    }
+  }
+  return out;
+}*/
+}  // namespace
 
 void ImageTask::CaptureImage(uint8_t const* data, int h, int w) {
   if (!m_accept_capture_requests || !m_mutex.try_lock()) {
@@ -35,6 +81,10 @@ ImageTask::RAIIRenableWrapper::RAIIRenableWrapper(ImageTask* image_task_ptr)
 ImageTask::RAIIRenableWrapper ImageTask::suspendCapture() {
   m_accept_capture_requests = false;
   return RAIIRenableWrapper(this);
+}
+
+std::string ImageTask::AsDataUrl() {
+  return "data:image/jpeg;base64," + base64_encode(getJpeg());
 }
 
 std::string ImageTask::getJpeg() {
@@ -93,6 +143,9 @@ void ImageTask::dumpJpegFile(const std::string& fn) {
   if (img.empty()) {
     return;
   }
+  
+  std::ofstream(fn + ".classification") << getClassification();
+  
   FILE* fp = std::fopen(fn.c_str(), "w");
   if (!fp) {
     return;
@@ -101,10 +154,10 @@ void ImageTask::dumpJpegFile(const std::string& fn) {
   std::fclose(fp);
 }
 
-float ImageTask::getClassification() {
+cpp_classifier::Classifier::Classification ImageTask::getClassification() {
   std::lock_guard<std::mutex> l(m_mutex);
   if (!m_classification) {
-    m_classification = m_classifierFun(m_data.data(), m_height, m_width);
+    m_classification = m_classifier.Classify(m_data.data(), m_height, m_width);
   }
   return *m_classification;
 }

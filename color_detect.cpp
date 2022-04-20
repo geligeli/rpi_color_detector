@@ -14,12 +14,9 @@
 #include "stepper_thread/stepper_thread.h"
 
 int main(int argc, char *argv[]) {
-  cpp_classifier::Classifier classifier("/nfs/general/shared/adder.tflite");
-  image_task::ImageTask imgTask(
-      [&](unsigned char const *data, int h, int w) -> float {
-        return classifier.Classify(data, h, w);
-      });
-  OnProvideImageJpeg = [&]() -> std::string { return imgTask.getJpeg(); };
+  cpp_classifier::Classifier classifier("/nfs/general/shared/tflite/fused_model.tflite");
+  image_task::ImageTask imgTask(classifier);
+  OnProvideImageJpeg = [&]() -> std::string { imgTask.getClassification(); return imgTask.getJpeg(); };
   stepper_thread::StepperThread stepper_thread(imgTask);
   OnKeyPress = [&](const std::string &key) {
     if (key == "KeyD" || key == "KeyA") {

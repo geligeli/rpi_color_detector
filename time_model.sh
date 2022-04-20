@@ -5,6 +5,6 @@ git pull
 cd build
 cmake ..
 make tflite_model_test
-./tflite_model_test
+./tflite_model_test /nfs/general/shared/tflite/fused_model.tflite
 
 
