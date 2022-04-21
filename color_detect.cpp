@@ -14,19 +14,31 @@
 #include "stepper_thread/stepper_thread.h"
 
 int main(int argc, char *argv[]) {
-  cpp_classifier::Classifier classifier("/nfs/general/shared/tflite/fused_model.tflite");
+  cpp_classifier::Classifier classifier(
+      "/nfs/general/shared/tflite/fused_model.tflite");
   image_task::ImageTask imgTask(classifier);
-  OnProvideImageJpeg = [&]() -> std::string { imgTask.getClassification(); return imgTask.getJpeg(); };
+  OnProvideImageJpeg = [&](std::ostream&os) {
+    auto capture = imgTask.getCurrentCapture();
+    os << capture->getJpeg();
+  };
+  OnProvideJson = [&](std::ostream&os) {
+    auto capture = imgTask.getCurrentCapture();
+    capture->dumpJson(os);
+  };
   stepper_thread::StepperThread stepper_thread(imgTask);
   OnKeyPress = [&](const std::string &key) {
     if (key == "KeyD" || key == "KeyA") {
+      auto capture = imgTask.getCurrentCapture();
+      // imgTask.getClassification();
+      // return capture.getJpeg();
+
       const auto outDir = std::filesystem::path("/nfs/general/shared") / key;
       std::filesystem::create_directories(outDir);
-      const auto msSinceEpoch =
-          std::chrono::duration_cast<std::chrono::milliseconds>(
-              std::chrono::system_clock::now().time_since_epoch())
-              .count();
-      imgTask.dumpJpegFile((outDir / (std::to_string(msSinceEpoch) + ".jpg")));
+      // const auto msSinceEpoch =
+      //     std::chrono::duration_cast<std::chrono::milliseconds>(
+      //         std::chrono::system_clock::now().time_since_epoch())
+      //         .count();
+      // imgTask.dumpJpegFile((outDir / (std::to_string(msSinceEpoch) + ".jpg")));
     }
     if (key == "KeyD") {
       stepper_thread.KeyD();

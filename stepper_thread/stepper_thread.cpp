@@ -105,13 +105,13 @@ bool StepperThread::DoOperation() {
       Step(-1, 20ms);
       break;
     case stepper_thread::OPERATIONS::AUTOSORT: {
-      const auto msSinceEpoch =
+      /*const auto msSinceEpoch =
           std::chrono::duration_cast<std::chrono::milliseconds>(
               std::chrono::system_clock::now().time_since_epoch())
-              .count();
+              .count();*/
       bool classification = false;
       {
-        m_image_task.get().WaitForNewCapture();
+        /*m_image_task.get().WaitForNewCapture();
         auto autoReEnable = m_image_task.get().suspendCapture();
 
         classification = m_image_task.get().getClassification().prob() > 0.5;
@@ -120,7 +120,7 @@ bool StepperThread::DoOperation() {
                            : std::filesystem::path("/nfs/general/shared/KeyD");
         std::filesystem::create_directories(outDir);
         m_image_task.get().dumpJpegFile(
-            (outDir / (std::to_string(msSinceEpoch) + "_.jpg")));
+            (outDir / (std::to_string(msSinceEpoch) + "_.jpg")));*/
       }
       if (classification) {
         Step(80, 4ms);
@@ -136,7 +136,7 @@ bool StepperThread::DoOperation() {
       break;
     }
     case stepper_thread::OPERATIONS::RECORD_POSITION_TRAINING_DATA: {
-      const auto msSinceEpoch =
+      /*const auto msSinceEpoch =
           std::chrono::duration_cast<std::chrono::milliseconds>(
               std::chrono::system_clock::now().time_since_epoch())
               .count();
@@ -154,7 +154,7 @@ bool StepperThread::DoOperation() {
         m_record_position_direction =
             (m_record_position_direction == DIRECTION::LEFT) ? DIRECTION::RIGHT
                                                              : DIRECTION::LEFT;
-      }
+      }*/
       break;
     }
     default:

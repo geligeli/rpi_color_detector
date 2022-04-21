@@ -16,7 +16,8 @@ namespace http = beast::http;      // from <boost/beast/http.hpp>
 namespace net = boost::asio;       // from <boost/asio.hpp>
 using tcp = boost::asio::ip::tcp;  // from <boost/asio/ip/tcp.hpp>
 
-std::function<std::string()> OnProvideImageJpeg;
+std::function<void(std::ostream&)> OnProvideImageJpeg;
+std::function<void(std::ostream&)> OnProvideJson;
 std::function<void(std::string key)> OnKeyPress;
 
 class http_connection : public std::enable_shared_from_this<http_connection> {
@@ -102,10 +103,20 @@ class http_connection : public std::enable_shared_from_this<http_connection> {
     } else if (request_.target().starts_with("/img")) {
       if (OnProvideImageJpeg) {
         response_.set(http::field::content_type, "image/jpeg");
-        beast::ostream(response_.body()) << OnProvideImageJpeg();
+        auto os = beast::ostream(response_.body());
+        OnProvideImageJpeg(os);
       } else {
         response_.set(http::field::content_type, "text/html");
         beast::ostream(response_.body()) << "OnProvideImageJpeg is not set!";
+      }
+    } else if (request_.target().starts_with("/json")) {
+      if (OnProvideJson) {
+        response_.set(http::field::content_type, "application/json");
+        auto os = beast::ostream(response_.body());
+        OnProvideJson(os);
+      } else {
+        response_.set(http::field::content_type, "text/html");
+        beast::ostream(response_.body()) << "OnProvideJson is not set!";
       }
     } else {
       response_.set(http::field::content_type, "text/html");

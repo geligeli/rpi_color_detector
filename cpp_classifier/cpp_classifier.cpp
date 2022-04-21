@@ -45,12 +45,15 @@ void Classifier::PrintDebugInfo() const {
   }
 }
 
-Classifier::Classification Classifier::Classify(unsigned char const* data, int h, int w) const {
+Classifier::Classification Classifier::Classify(unsigned char const* data,
+                                                int h, int w) const {
   TfLiteTensorCopyFromBuffer(inputTensors[0], data, h * w * 3);
   TfLiteInterpreterInvoke(interpreter.get());
   Classification result;
-  TfLiteTensorCopyToBuffer(outputTensors[0], &result.classification, sizeof(result.classification));
-  TfLiteTensorCopyToBuffer(outputTensors[1], &result.orientation, sizeof(result.orientation));
+  TfLiteTensorCopyToBuffer(outputTensors[0], &result.classification,
+                           sizeof(result.classification));
+  TfLiteTensorCopyToBuffer(outputTensors[1], &result.orientation,
+                           sizeof(result.orientation));
   return result;
 }
 

@@ -1,8 +1,9 @@
 #include "image_task/image_task.h"
 
 #include <jpeglib.h>
-#include <fstream>
+
 #include <cstring>
+#include <fstream>
 
 namespace image_task {
 
@@ -53,45 +54,49 @@ std::string base64_decode(const std::string& in) {
 }  // namespace
 
 void ImageTask::CaptureImage(uint8_t const* data, int h, int w) {
-  if (!m_accept_capture_requests || !m_mutex.try_lock()) {
-    return;
+  m_image_for_capture->m_data.resize(h * w * 3);
+  m_image_for_capture->m_height = h;
+  m_image_for_capture->m_width = w;
+  std::memcpy(m_image_for_capture->m_data.data(), data, h * w * 3);
+  {
+    std::lock_guard lk(m_mutex);
+    std::swap(m_image_for_capture, m_last_image_for_capture);
+    m_current_capture = nullptr;
   }
-  m_data.resize(h * w * 3);
-  m_height = h;
-  m_width = w;
-  m_jpeg_representation = {};
-  m_classification = {};
-  std::memcpy(m_data.data(), data, h * w * 3);
-  m_mutex.unlock();
-  m_cv.notify_all();
+  m_cv.notify_one();
 }
 
-void ImageTask::WaitForNewCapture() {
+std::shared_ptr<ImageTask::Capture> ImageTask::getCurrentCapture() {
   std::unique_lock<std::mutex> lk(m_mutex);
-  m_cv.wait(lk, [] { return true; });
-}
-
-ImageTask::RAIIRenableWrapper::~RAIIRenableWrapper() {
-  m_image_task_ptr->m_accept_capture_requests = true;
-}
-
-ImageTask::RAIIRenableWrapper::RAIIRenableWrapper(ImageTask* image_task_ptr)
-    : m_image_task_ptr{image_task_ptr} {}
-
-ImageTask::RAIIRenableWrapper ImageTask::suspendCapture() {
-  m_accept_capture_requests = false;
-  return RAIIRenableWrapper(this);
-}
-
-std::string ImageTask::AsDataUrl() {
-  return "data:image/jpeg;base64," + base64_encode(getJpeg());
-}
-
-std::string ImageTask::getJpeg() {
-  std::lock_guard<std::mutex> l(m_mutex);
-  if (m_data.empty()) {
-    return "";
+  if (m_last_image_for_capture->m_data.empty()) {
+    lk.unlock();
+    return getNextCapture();
   }
+
+  if (m_current_capture == nullptr) {
+    m_current_capture = std::shared_ptr<Capture>(new ImageTask::Capture(std::move(*m_last_image_for_capture), this));
+  }
+  return m_current_capture;
+}
+
+std::shared_ptr<ImageTask::Capture> ImageTask::getNextCapture() {
+  std::unique_lock<std::mutex> lk(m_mutex);
+  m_cv.wait(lk, [&](){return !m_last_image_for_capture->m_data.empty();});
+  m_current_capture = std::shared_ptr<Capture>(new ImageTask::Capture(std::move(*m_last_image_for_capture), this));
+  return m_current_capture;
+}
+
+ImageTask::Capture::Capture(ImageTask::RawImage&& raw_image, ImageTask* parent)
+    : m_raw_image{std::move(raw_image)}, m_parent{parent} {}
+
+void ImageTask::Capture::dumpJson(std::ostream& os) {
+  os << "{\"image\" : \"data:image/jpeg;base64," << base64_encode(getJpeg()) << "\", \"classification\":";
+  cpp_classifier::Classifier::Classification c = getClassification();
+  os << c.prob() << "}";
+}
+
+const std::string& ImageTask::Capture::getJpeg() {
+  std::lock_guard<std::mutex> lk(m_jpeg_mutex);
   if (m_jpeg_representation) {
     return *m_jpeg_representation;
   }
@@ -114,15 +119,15 @@ std::string ImageTask::getJpeg() {
 
   jpeg_mem_dest(&cinfo, &result.buf, &result.size);
 
-  cinfo.image_width = m_width;
-  cinfo.image_height = m_height;
+  cinfo.image_width = m_raw_image.m_width;
+  cinfo.image_height = m_raw_image.m_height;
   cinfo.input_components = 3;      // Number of color components per pixel.
   cinfo.in_color_space = JCS_RGB;  // Colorspace of input image as RGB.
 
   jpeg_set_defaults(&cinfo);
   jpeg_set_quality(&cinfo, quality, TRUE);
 
-  unsigned char* image_buffer = m_data.data();
+  unsigned char* image_buffer = m_raw_image.m_data.data();
   jpeg_start_compress(&cinfo, TRUE);
   row_stride = cinfo.image_width * 3;  // JSAMPLEs per row in image_buffer
 
@@ -138,14 +143,14 @@ std::string ImageTask::getJpeg() {
   return buffer;
 }
 
-void ImageTask::dumpJpegFile(const std::string& fn) {
-  auto img = getJpeg();
+void ImageTask::Capture::dumpJpegFile(const std::string& fn) {
+  const auto& img = getJpeg();
   if (img.empty()) {
     return;
   }
-  
+
   std::ofstream(fn + ".classification") << getClassification();
-  
+
   FILE* fp = std::fopen(fn.c_str(), "w");
   if (!fp) {
     return;
@@ -154,10 +159,13 @@ void ImageTask::dumpJpegFile(const std::string& fn) {
   std::fclose(fp);
 }
 
-cpp_classifier::Classifier::Classification ImageTask::getClassification() {
-  std::lock_guard<std::mutex> l(m_mutex);
+cpp_classifier::Classifier::Classification
+ImageTask::Capture::getClassification() {
+  std::lock_guard<std::mutex> lk(m_classification_mutex);
   if (!m_classification) {
-    m_classification = m_classifier.Classify(m_data.data(), m_height, m_width);
+    m_classification = m_parent->m_classifier.Classify(
+        m_raw_image.m_data.data(), m_raw_image.m_height,
+        m_raw_image.m_width);
   }
   return *m_classification;
 }
