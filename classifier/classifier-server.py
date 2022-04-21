@@ -150,8 +150,8 @@ class MyServer(SimpleHTTPRequestHandler):
         <body>
         <div class="flexbox-container">
         '''
-        s += self.imageList('KeyA', A_FILES)
-        s += self.imageList('KeyD', D_FILES)
+        s += self.imageList('KeyA', sorted(A_FILES))
+        s += self.imageList('KeyD', sorted(D_FILES))
         s += '''
         </div>
         </body>
