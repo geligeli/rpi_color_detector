@@ -1,0 +1,17 @@
+.flexbox-container {
+    display: flex;
+}
+.class-div {
+    border: 2px solid black;
+    padding: 2px;
+}
+.cropped {
+    width: 40px;
+    height: 80px;
+    overflow: hidden;
+}
+.cropped img {
+    width: 640px;
+    height: 480px;
+    margin: -200px 0px 0px -300px;
+}

@@ -95,11 +95,7 @@ class http_connection : public std::enable_shared_from_this<http_connection> {
             request_.target().substr(std::string("/press?k=").size())));
       }
       response_.set(http::field::content_type, "application/json");
-      beast::ostream(response_.body()) << R"""(
-        {
-          "foo" : "bar"
-        }
-      )""";
+      beast::ostream(response_.body()) << "{}";
     } else if (request_.target().starts_with("/img")) {
       if (OnProvideImageJpeg) {
         response_.set(http::field::content_type, "image/jpeg");

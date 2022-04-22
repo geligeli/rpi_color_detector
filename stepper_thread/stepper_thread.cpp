@@ -105,22 +105,20 @@ bool StepperThread::DoOperation() {
       Step(-1, 20ms);
       break;
     case stepper_thread::OPERATIONS::AUTOSORT: {
-      /*const auto msSinceEpoch =
+      const auto msSinceEpoch =
           std::chrono::duration_cast<std::chrono::milliseconds>(
               std::chrono::system_clock::now().time_since_epoch())
-              .count();*/
+              .count();
       bool classification = false;
       {
-        /*m_image_task.get().WaitForNewCapture();
-        auto autoReEnable = m_image_task.get().suspendCapture();
-
-        classification = m_image_task.get().getClassification().prob() > 0.5;
+        auto capture = m_image_task.get().getNextCapture();
+        classification = capture->getClassification().prob() > 0.5;
         const auto outDir =
             classification ? std::filesystem::path("/nfs/general/shared/KeyA")
                            : std::filesystem::path("/nfs/general/shared/KeyD");
         std::filesystem::create_directories(outDir);
-        m_image_task.get().dumpJpegFile(
-            (outDir / (std::to_string(msSinceEpoch) + "_.jpg")));*/
+        capture->dumpJpegFile(
+            (outDir / (std::to_string(msSinceEpoch) + "_.jpg")));
       }
       if (classification) {
         Step(80, 4ms);
@@ -136,17 +134,15 @@ bool StepperThread::DoOperation() {
       break;
     }
     case stepper_thread::OPERATIONS::RECORD_POSITION_TRAINING_DATA: {
-      /*const auto msSinceEpoch =
+      const auto msSinceEpoch =
           std::chrono::duration_cast<std::chrono::milliseconds>(
               std::chrono::system_clock::now().time_since_epoch())
               .count();
       {
-        m_image_task.get().WaitForNewCapture();
-        auto autoReEnable = m_image_task.get().suspendCapture();
         const auto outDir = std::filesystem::path(
             "/nfs/general/shared/pos/" + std::to_string(m_step_position));
         std::filesystem::create_directories(outDir);
-        m_image_task.get().dumpJpegFile(
+        m_image_task.get().getNextCapture()->dumpJpegFile(
             (outDir / (std::to_string(msSinceEpoch) + "_.jpg")));
       }
       Step(m_record_position_direction, 20ms);
@@ -154,7 +150,7 @@ bool StepperThread::DoOperation() {
         m_record_position_direction =
             (m_record_position_direction == DIRECTION::LEFT) ? DIRECTION::RIGHT
                                                              : DIRECTION::LEFT;
-      }*/
+      }
       break;
     }
     default:

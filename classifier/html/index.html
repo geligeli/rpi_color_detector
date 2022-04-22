@@ -1,0 +1,36 @@
+<html>
+
+<head>
+    <link rel="stylesheet" href="style.css">
+    <script src="js.js"></script>
+    <title>Classifier Server</title>
+</head>
+
+<body>
+    <div id="image_container" class="flexbox-container">
+    </div>
+    <script>
+        var imageContainer = document.getElementById("image_container");
+        listImages('key_a_d', (response) => {
+            for (const [key, value] of Object.entries(response)) {
+                var element = document.createElement("div");
+                element.innerHTML = key + '<br/>'
+                for (const x of value) {
+        //             l += '<div class="cropped"><img src="{}"/ class="cropped" onclick="labelImage(\'{}\', \'{}\')"></div>'.format(
+        //         i, splitl[1], splitl[2])
+        // l += '</div>'
+                    var newDiv = document.createElement("div");
+                    newDiv.classList.add("cropped");
+                    var newImage = document.createElement("img");
+                    newImage.src = 'cgi-bin?app=image&imageName=' + x
+                    newImage.classList.add("cropped");
+                    newDiv.appendChild(newImage);
+                    element.appendChild(newDiv);
+                }
+                imageContainer.appendChild(element);
+            }
+        })
+    </script>
+</body>
+
+</html>

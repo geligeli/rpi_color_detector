@@ -68,14 +68,15 @@ void ImageTask::CaptureImage(uint8_t const* data, int h, int w) {
 
 std::shared_ptr<ImageTask::Capture> ImageTask::getCurrentCapture() {
   std::unique_lock<std::mutex> lk(m_mutex);
-  if (m_last_image_for_capture->m_data.empty()) {
+  if (m_current_capture == nullptr) {
+  // if (m_last_image_for_capture->m_data.empty()) {
     lk.unlock();
     return getNextCapture();
   }
 
-  if (m_current_capture == nullptr) {
-    m_current_capture = std::shared_ptr<Capture>(new ImageTask::Capture(std::move(*m_last_image_for_capture), this));
-  }
+  // if (m_current_capture == nullptr) {
+  //   m_current_capture = std::shared_ptr<Capture>(new ImageTask::Capture(std::move(*m_last_image_for_capture), this));
+  // }
   return m_current_capture;
 }
 
@@ -144,18 +145,13 @@ const std::string& ImageTask::Capture::getJpeg() {
 }
 
 void ImageTask::Capture::dumpJpegFile(const std::string& fn) {
-  const auto& img = getJpeg();
-  if (img.empty()) {
-    return;
-  }
-
-  std::ofstream(fn + ".classification") << getClassification();
-
   FILE* fp = std::fopen(fn.c_str(), "w");
   if (!fp) {
     return;
   }
+  const auto& img = getJpeg();
   std::fwrite(&img[0], img.size(), 1, fp);
+  std::ofstream(fn + ".classification") << getClassification();
   std::fclose(fp);
 }
 

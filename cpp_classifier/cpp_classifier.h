@@ -9,6 +9,7 @@
 #include <memory>
 #include <string>
 #include <vector>
+#include <mutex>
 
 namespace cpp_classifier {
 
@@ -21,7 +22,7 @@ struct Classifier {
     std::array<float, 2> orientation;
 
     double prob() const {
-      return 1.0 / (1.0 + exp(classification[1] - classification[0]));
+      return classification[0];
     }
     double angle() const {
       return atan2(orientation[1], orientation[0]) * 180 / 3.14159265;
@@ -36,6 +37,7 @@ struct Classifier {
   void PrintDebugInfo() const;
 
  private:
+  mutable std::mutex m_mutex{};
   std::unique_ptr<TfLiteInterpreter, void (*)(TfLiteInterpreter *)> interpreter{
       nullptr, TfLiteInterpreterDelete};
   std::unique_ptr<TfLiteInterpreterOptions,

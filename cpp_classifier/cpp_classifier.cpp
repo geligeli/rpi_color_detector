@@ -1,5 +1,7 @@
 #include "cpp_classifier/cpp_classifier.h"
 
+#include <algorithm>
+#include <cstring>
 #include <iostream>
 
 namespace cpp_classifier {
@@ -25,20 +27,24 @@ Classifier::Classifier(const std::string& fn) {
     outputTensors.push_back(
         TfLiteInterpreterGetOutputTensor(interpreter.get(), i));
   }
+  std::sort(outputTensors.begin(), outputTensors.end(), [](const auto* a, const auto* b){
+    return std::strcmp(TfLiteTensorName(a), TfLiteTensorName(b));
+  });
 }
 
 void Classifier::PrintDebugInfo() const {
+  std::lock_guard<std::mutex> lk(m_mutex);
   int index{0};
   for (const auto* inputTensor : inputTensors) {
     std::cout << "Input tensor [" << index++
-              << "] type=" << TfLiteTypeGetName(inputTensor->type) << '\n';
+              << "] name=" << TfLiteTensorName(inputTensor) << " type=" << TfLiteTypeGetName(inputTensor->type) << '\n';
     for (int i = 0; i < inputTensor->dims->size; ++i) {
       std::cout << "dim[" << i << "]=" << inputTensor->dims->data[i] << '\n';
     }
   }
   for (const auto* outputTensor : outputTensors) {
     std::cout << "Output tensor [" << index++
-              << "] type=" << TfLiteTypeGetName(outputTensor->type) << '\n';
+              << "] name=" << TfLiteTensorName(outputTensor) << " type=" << TfLiteTypeGetName(outputTensor->type) << '\n';
     for (int i = 0; i < outputTensor->dims->size; ++i) {
       std::cout << "dim[" << i << "]=" << outputTensor->dims->data[i] << '\n';
     }
@@ -47,6 +53,7 @@ void Classifier::PrintDebugInfo() const {
 
 Classifier::Classification Classifier::Classify(unsigned char const* data,
                                                 int h, int w) const {
+  std::lock_guard<std::mutex> lk(m_mutex);
   TfLiteTensorCopyFromBuffer(inputTensors[0], data, h * w * 3);
   TfLiteInterpreterInvoke(interpreter.get());
   Classification result;

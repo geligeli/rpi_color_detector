@@ -1,0 +1,37 @@
+<html>
+
+<head>
+    <link rel="stylesheet" href="style.css">
+    <script src="js.js"></script>
+    <title>Classifier Server</title>
+</head>
+
+<body>
+    <div id="image_container" class="flexbox-container">
+    </div>
+    <script>
+        var imageContainer = document.getElementById("image_container");
+        listImages('multiclass', (response) => {
+            for (const [key, value] of Object.entries(response)) {
+                var containerDiv = document.createElement("div");
+                containerDiv.classList.add("class-div");
+                containerDiv.id = 'div-for-images-with-color-' + key;
+                containerDiv.innerHTML = key + '<br/><input type="radio" id="' + key + '" name="class" value="' + key + '">';
+                for (const x of value) {
+                    var newDiv = document.createElement("div");
+                    newDiv.onclick = makeImageLabelCallback(x);
+                    newDiv.id = x
+                    newDiv.classList.add("cropped");
+                    var newImage = document.createElement("img");
+                    newImage.src = 'cgi-bin?app=image&imageName=' + x
+                    newImage.classList.add("cropped");
+                    newDiv.appendChild(newImage);
+                    containerDiv.appendChild(newDiv);
+                }
+                imageContainer.appendChild(containerDiv);
+            }
+        })
+    </script>
+</body>
+
+</html>
