@@ -14,6 +14,19 @@ function listImages(dataset, onloadFun) {
     req.send();
 }
 
+
+function predictOnDataset(sourceDataset, sourceClass, onloadFun) {
+    req = new XMLHttpRequest();
+    req.responseType = 'json';
+    req.onload = function () {
+        onloadFun(req.response)
+    }
+    req.open("GET", 'cgi-bin?app=predictOnDataset&' +
+        'sourceDataset=' + sourceDataset +
+        '&sourceClass=' + sourceClass, true);
+    req.send();
+}
+
 function relabelImage(sourceImage) {
     selectedClassObj = document.querySelector('input[name="class"]:checked');
     if (!selectedClassObj) {
@@ -21,8 +34,8 @@ function relabelImage(sourceImage) {
         return;
     }
     targetClass = selectedClassObj.value;
-    targetDivContainer=document.getElementById('div-for-images-with-color-' + targetClass);
-    srcDiv=document.getElementById(sourceImage);
+    targetDivContainer = document.getElementById('div-for-images-with-color-' + targetClass);
+    srcDiv = document.getElementById(sourceImage);
     targetDivContainer.appendChild(srcDiv);
     req = new XMLHttpRequest();
     req.open("GET", 'cgi-bin?app=relabelImage&sourceImage=' + sourceImage + '&targetClass=' + targetClass, true);

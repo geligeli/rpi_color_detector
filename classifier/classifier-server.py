@@ -12,8 +12,6 @@ from http.server import HTTPServer, SimpleHTTPRequestHandler
 from socketserver import ThreadingMixIn
 from urllib.parse import parse_qs, urlparse
 
-import tensorflow as tf
-
 import image_provider
 
 HTML_DIR = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'html')
@@ -99,6 +97,20 @@ class MyServer(SimpleHTTPRequestHandler):
         targetClass = query_string["targetClass"][0]
         self.image_provider.relabelImage(sourceImage, targetClass)
         return self.serveString('{}', 'application/json')
+    
+    def CGI_predictOnDataset(self, query_string):
+        sourceDataset = query_string["sourceDataset"][0]
+        sourceClass = query_string["sourceClass"][0]
+        allData = self.image_provider.listImages(sourceDataset)
+        label_names = sorted([x for x in allData if x not in [
+            'unclassified', '_garbage']])
+        image_list = [self.image_provider.filePath(x) for x in  allData[sourceClass]] # [:10]
+        import tensorflow as tf
+        model = tf.saved_model.load('/nfs/general/shared/tf_models/color_classifier')
+        result = {x:[] for x in label_names}
+        for x,y  in zip(image_list, self.image_provider.labelImageList(image_list, model, label_names)):
+            result[y].append(x)       
+        return self.serveString(json.dumps(result), 'application/json')
 
     def send_head(self):
         try:

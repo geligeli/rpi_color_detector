@@ -6,12 +6,12 @@
     padding: 2px;
 }
 .cropped {
-    width: 40px;
-    height: 80px;
+    width: 80px;
+    height: 100px;
     overflow: hidden;
 }
 .cropped img {
     width: 640px;
     height: 480px;
-    margin: -200px 0px 0px -300px;
+    margin: -213px 0px 0px -276px;
 }

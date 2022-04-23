@@ -11,7 +11,7 @@
     </div>
     <script>
         var imageContainer = document.getElementById("image_container");
-        listImages('classified', (response) => {
+        predictOnDataset('multiclass', 'unclassified', (response) => {
             for (const [key, value] of Object.entries(response)) {
                 var containerDiv = document.createElement("div");
                 containerDiv.classList.add("class-div");
