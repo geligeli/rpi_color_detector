@@ -15,13 +15,13 @@
 
 int main(int argc, char *argv[]) {
   cpp_classifier::Classifier classifier(
-      "/nfs/general/shared/tflite/fused_model.tflite");
+      "/nfs/general/shared/tflite/color_classifier_non_quatized.tflite");
   image_task::ImageTask imgTask(classifier);
-  OnProvideImageJpeg = [&](std::ostream&os) {
+  OnProvideImageJpeg = [&](std::ostream &os) {
     auto capture = imgTask.getCurrentCapture();
     os << capture->getJpeg();
   };
-  OnProvideJson = [&](std::ostream&os) {
+  OnProvideJson = [&](std::ostream &os) {
     auto capture = imgTask.getCurrentCapture();
     capture->dumpJson(os);
   };
@@ -34,7 +34,8 @@ int main(int argc, char *argv[]) {
           std::chrono::duration_cast<std::chrono::milliseconds>(
               std::chrono::system_clock::now().time_since_epoch())
               .count();
-      imgTask.getCurrentCapture()->dumpJpegFile((outDir / (std::to_string(msSinceEpoch) + ".jpg")));
+      imgTask.getCurrentCapture()->dumpJpegFile(
+          (outDir / (std::to_string(msSinceEpoch) + ".jpg")));
     }
     if (key == "KeyD") {
       stepper_thread.KeyD();
@@ -58,14 +59,6 @@ int main(int argc, char *argv[]) {
     CameraLoop loop(
         [&](uint8_t *data, const libcamera::StreamConfiguration &config) {
           imgTask.CaptureImage(data, config.size.height, config.size.width);
-          // if (!m.try_lock()) {
-          //   return;
-          // }
-          // img.data = data;
-          // img.h = config.size.height;
-          // img.w = config.size.width;
-          // img.classification = classifier.Classify(img.data, img.h, img.w);
-          // m.unlock();
         });
     if (argc > 2) {
       run_server(argv[1], std::atoi(argv[2]));

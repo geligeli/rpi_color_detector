@@ -27,9 +27,10 @@ Classifier::Classifier(const std::string& fn) {
     outputTensors.push_back(
         TfLiteInterpreterGetOutputTensor(interpreter.get(), i));
   }
-  std::sort(outputTensors.begin(), outputTensors.end(), [](const auto* a, const auto* b){
-    return std::strcmp(TfLiteTensorName(a), TfLiteTensorName(b));
-  });
+  std::sort(outputTensors.begin(), outputTensors.end(),
+            [](const auto* a, const auto* b) {
+              return std::strcmp(TfLiteTensorName(a), TfLiteTensorName(b));
+            });
 }
 
 void Classifier::PrintDebugInfo() const {
@@ -37,14 +38,16 @@ void Classifier::PrintDebugInfo() const {
   int index{0};
   for (const auto* inputTensor : inputTensors) {
     std::cout << "Input tensor [" << index++
-              << "] name=" << TfLiteTensorName(inputTensor) << " type=" << TfLiteTypeGetName(inputTensor->type) << '\n';
+              << "] name=" << TfLiteTensorName(inputTensor)
+              << " type=" << TfLiteTypeGetName(inputTensor->type) << '\n';
     for (int i = 0; i < inputTensor->dims->size; ++i) {
       std::cout << "dim[" << i << "]=" << inputTensor->dims->data[i] << '\n';
     }
   }
   for (const auto* outputTensor : outputTensors) {
     std::cout << "Output tensor [" << index++
-              << "] name=" << TfLiteTensorName(outputTensor) << " type=" << TfLiteTypeGetName(outputTensor->type) << '\n';
+              << "] name=" << TfLiteTensorName(outputTensor)
+              << " type=" << TfLiteTypeGetName(outputTensor->type) << '\n';
     for (int i = 0; i < outputTensor->dims->size; ++i) {
       std::cout << "dim[" << i << "]=" << outputTensor->dims->data[i] << '\n';
     }
@@ -54,13 +57,18 @@ void Classifier::PrintDebugInfo() const {
 Classifier::Classification Classifier::Classify(unsigned char const* data,
                                                 int h, int w) const {
   std::lock_guard<std::mutex> lk(m_mutex);
-  TfLiteTensorCopyFromBuffer(inputTensors[0], data, h * w * 3);
+  static std::vector<float> f(h * w * 3);
+  for (int i = 0; i < h * w * 3; ++i) {
+    f[i] = data[i];
+  }
+  TfLiteTensorCopyFromBuffer(inputTensors[0], f.data(),
+                             h * w * 3 * sizeof(float));
   TfLiteInterpreterInvoke(interpreter.get());
   Classification result;
   TfLiteTensorCopyToBuffer(outputTensors[0], &result.classification,
                            sizeof(result.classification));
-  TfLiteTensorCopyToBuffer(outputTensors[1], &result.orientation,
-                           sizeof(result.orientation));
+  // TfLiteTensorCopyToBuffer(outputTensors[1], &result.orientation,
+  //                          sizeof(result.orientation));
   return result;
 }
 

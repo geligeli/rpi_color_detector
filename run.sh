@@ -7,4 +7,4 @@ pushd build
 cmake ..
 make color_detect
 popd
-sudo ./build/color_detect ./http_server 1234
+sudo COLOR=${COLOR} ./build/color_detect ./http_server 1234

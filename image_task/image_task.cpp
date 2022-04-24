@@ -69,21 +69,17 @@ void ImageTask::CaptureImage(uint8_t const* data, int h, int w) {
 std::shared_ptr<ImageTask::Capture> ImageTask::getCurrentCapture() {
   std::unique_lock<std::mutex> lk(m_mutex);
   if (m_current_capture == nullptr) {
-  // if (m_last_image_for_capture->m_data.empty()) {
     lk.unlock();
     return getNextCapture();
   }
-
-  // if (m_current_capture == nullptr) {
-  //   m_current_capture = std::shared_ptr<Capture>(new ImageTask::Capture(std::move(*m_last_image_for_capture), this));
-  // }
   return m_current_capture;
 }
 
 std::shared_ptr<ImageTask::Capture> ImageTask::getNextCapture() {
   std::unique_lock<std::mutex> lk(m_mutex);
-  m_cv.wait(lk, [&](){return !m_last_image_for_capture->m_data.empty();});
-  m_current_capture = std::shared_ptr<Capture>(new ImageTask::Capture(std::move(*m_last_image_for_capture), this));
+  m_cv.wait(lk, [&]() { return !m_last_image_for_capture->m_data.empty(); });
+  m_current_capture = std::shared_ptr<Capture>(
+      new ImageTask::Capture(std::move(*m_last_image_for_capture), this));
   return m_current_capture;
 }
 
@@ -91,9 +87,10 @@ ImageTask::Capture::Capture(ImageTask::RawImage&& raw_image, ImageTask* parent)
     : m_raw_image{std::move(raw_image)}, m_parent{parent} {}
 
 void ImageTask::Capture::dumpJson(std::ostream& os) {
-  os << "{\"image\" : \"data:image/jpeg;base64," << base64_encode(getJpeg()) << "\", \"classification\":";
+  os << "{\"image\" : \"data:image/jpeg;base64," << base64_encode(getJpeg())
+     << "\", \"classification\":";
   cpp_classifier::Classifier::Classification c = getClassification();
-  os << c.prob() << "}";
+  os << "\"" << c.predictedClass() << "\"}";
 }
 
 const std::string& ImageTask::Capture::getJpeg() {
@@ -160,8 +157,7 @@ ImageTask::Capture::getClassification() {
   std::lock_guard<std::mutex> lk(m_classification_mutex);
   if (!m_classification) {
     m_classification = m_parent->m_classifier.Classify(
-        m_raw_image.m_data.data(), m_raw_image.m_height,
-        m_raw_image.m_width);
+        m_raw_image.m_data.data(), m_raw_image.m_height, m_raw_image.m_width);
   }
   return *m_classification;
 }

@@ -3,10 +3,10 @@
 #include <atomic>
 #include <condition_variable>
 #include <functional>
+#include <memory>
 #include <mutex>
 #include <optional>
 #include <string>
-#include <memory>
 #include <vector>
 
 #include "cpp_classifier/cpp_classifier.h"

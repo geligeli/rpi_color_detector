@@ -16,8 +16,8 @@ namespace http = beast::http;      // from <boost/beast/http.hpp>
 namespace net = boost::asio;       // from <boost/asio.hpp>
 using tcp = boost::asio::ip::tcp;  // from <boost/asio/ip/tcp.hpp>
 
-std::function<void(std::ostream&)> OnProvideImageJpeg;
-std::function<void(std::ostream&)> OnProvideJson;
+std::function<void(std::ostream &)> OnProvideImageJpeg;
+std::function<void(std::ostream &)> OnProvideJson;
 std::function<void(std::string key)> OnKeyPress;
 
 class http_connection : public std::enable_shared_from_this<http_connection> {

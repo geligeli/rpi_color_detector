@@ -105,20 +105,34 @@ bool StepperThread::DoOperation() {
       Step(-1, 20ms);
       break;
     case stepper_thread::OPERATIONS::AUTOSORT: {
+      /*
       const auto msSinceEpoch =
           std::chrono::duration_cast<std::chrono::milliseconds>(
               std::chrono::system_clock::now().time_since_epoch())
-              .count();
+              .count();*/
       bool classification = false;
       {
+        using namespace std::string_literals;
         auto capture = m_image_task.get().getNextCapture();
-        classification = capture->getClassification().prob() > 0.5;
-        const auto outDir =
+        static const std::string kColorToFilter =
+            []() -> std::string {
+          if (const char* env_p = std::getenv("COLOR")) {
+            return env_p;
+          }
+          std::terminate();
+          return "";
+        }();
+
+        classification = kColorToFilter ==
+                           capture->getClassification().predictedClass();
+        std::cerr << capture->getClassification().predictedClass() << " " << kColorToFilter << " " << classification << '\n';
+
+/*        const auto outDir =
             classification ? std::filesystem::path("/nfs/general/shared/KeyA")
                            : std::filesystem::path("/nfs/general/shared/KeyD");
         std::filesystem::create_directories(outDir);
         capture->dumpJpegFile(
-            (outDir / (std::to_string(msSinceEpoch) + "_.jpg")));
+            (outDir / (std::to_string(msSinceEpoch) + "_.jpg")));*/
       }
       if (classification) {
         Step(80, 4ms);
